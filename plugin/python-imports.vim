@@ -28,9 +28,16 @@ function! ImportName(name, here)
 " on the line above the cursor, if 'here' is false, adds the line to the top
 " of the current file.
 
+    " If name is empty, pick up the word under cursor
+    if a:name == ""
+        let l:name = expand("<cword>")
+    else
+        let l:name = a:name
+    endif
+
     " Try to jump to a tag in a new window
     let v:errmsg = ""
-    exec "stjump" a:name
+    exec "stjump" l:name
     if v:errmsg != ""
         " Tag not found, bail out
         return
@@ -64,8 +71,8 @@ function! ImportName(name, here)
     " Find out the indentation of the current line
     let indent = matchstr(getline("."), "^[ \t]*\\%(>>> \\)\\=")
     " Add an import statement
-    put! = indent . 'from ' . pkg . ' import ' . a:name
+    put! = indent . 'from ' . pkg . ' import ' . l:name
 endf
 
-command! -nargs=1 -complete=tag ImportName	call ImportName(<f-args>, 0)
-command! -nargs=1 -complete=tag ImportNameHere	call ImportName(<f-args>, 1)
+command! -nargs=? -complete=tag ImportName	call ImportName(<q-args>, 0)
+command! -nargs=? -complete=tag ImportNameHere	call ImportName(<q-args>, 1)
