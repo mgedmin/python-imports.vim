@@ -1,5 +1,5 @@
 " File: python-imports.vim
-" Author: Marius Gedminas <mgedmin@b4net.lt.>
+" Author: Marius Gedminas <mgedmin@b4net.lt>
 " Version: 0.1
 " Last Modified: 2005-02-18
 "
