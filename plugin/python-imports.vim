@@ -39,28 +39,34 @@ function! ImportName(name, here)
     let v:errmsg = ""
     exec "stjump" l:name
     if v:errmsg != ""
-        " Tag not found, bail out
-        return
-    endif
-    " Look at the file name of the module that contains this tag.  Find the
-    " nearest parent directory that does not have __init__.py.  Assume it is
-    " directly included in PYTHONPATH.
-    let pkg = expand("%:p")
-    let root = fnamemodify(pkg, ":h")
-    while strlen(root)
-        if !filereadable(root . "/__init__.py")
-            break
+        " Tag not found, try some hardcoded ones
+        if l:name == "removeSecurityProxy"
+            let pkg = "zope.security.proxy"
+        else
+            " Give up and bail out
+            return
         endif
-        let root = fnamemodify(root, ":h")
-    endwhile
-    let pkg = strpart(pkg, strlen(root))
-    " Convert the relative path into a Python dotted module name
-    let pkg = substitute(pkg, ".py$", "", "")
-    let pkg = substitute(pkg, ".__init__$", "", "")
-    let pkg = substitute(pkg, "^/", "", "g")
-    let pkg = substitute(pkg, "/", ".", "g")
-    " Close the window containing the tag
-    close
+    else
+        " Look at the file name of the module that contains this tag.  Find the
+        " nearest parent directory that does not have __init__.py.  Assume it is
+        " directly included in PYTHONPATH.
+        let pkg = expand("%:p")
+        let root = fnamemodify(pkg, ":h")
+        while strlen(root)
+            if !filereadable(root . "/__init__.py")
+                break
+            endif
+            let root = fnamemodify(root, ":h")
+        endwhile
+        let pkg = strpart(pkg, strlen(root))
+        " Convert the relative path into a Python dotted module name
+        let pkg = substitute(pkg, ".py$", "", "")
+        let pkg = substitute(pkg, ".__init__$", "", "")
+        let pkg = substitute(pkg, "^/", "", "g")
+        let pkg = substitute(pkg, "/", ".", "g")
+        " Close the window containing the tag
+        close
+    endif
     " Find the place for adding the import statement
     if !a:here
         1                               " Go to the top
