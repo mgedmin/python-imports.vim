@@ -37,6 +37,7 @@ function! ImportName(name, here)
 
     " Try to jump to a tag in a new window
     let v:errmsg = ""
+    let l:oldfile = expand('%')
     exec "stjump" l:name
     if v:errmsg != ""
         " Tag not found, try some hardcoded ones
@@ -47,6 +48,11 @@ function! ImportName(name, here)
             return
         endif
     else
+        if l:oldfile == expand('%')
+            " Either the user aborted the tag jump, or the tag exists in
+            " the same file, and therefore import is pointless
+            return
+        endif 
         " Look at the file name of the module that contains this tag.  Find the
         " nearest parent directory that does not have __init__.py.  Assume it is
         " directly included in PYTHONPATH.
@@ -64,15 +70,22 @@ function! ImportName(name, here)
         let pkg = substitute(pkg, ".__init__$", "", "")
         let pkg = substitute(pkg, "^/", "", "g")
         let pkg = substitute(pkg, "/", ".", "g")
+        " Get rid of the last module name if it starts with an underscore, e.g.
+        " zope.schema._builtinfields -> zope.schema
+        let pkg = substitute(pkg, "[.]_[a-zA-Z0-9_]*$", "", "")
+        " Convert top-level zc_foo/zope_foo names into zc.foo/zope.foo
+        let pkg = substitute(pkg, '^\([a-z]\+\)_\([a-z]\+\)', '\1.\2', "")
         " Close the window containing the tag
         close
     endif
     " Find the place for adding the import statement
     if !a:here
         1                               " Go to the top
-        silent! /^"""/;/^"""/           " Skip docstring, if it exists
+        silent! 0/^"""/;/^"""/          " Skip docstring, if it exists
         silent! /^import\|^from/        " Find the first import statement
-        normal }                        " Find the first empty line after that
+        " Find the first empty line after that.  NOTE: DO NOT put any comments
+        " on the line that says `normal`, or you'll get 24 extra spaces here
+        normal }
     endif
     " Find out the indentation of the current line
     let indent = matchstr(getline("."), "^[ \t]*\\%(>>> \\)\\=")
