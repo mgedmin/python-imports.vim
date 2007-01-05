@@ -62,16 +62,17 @@ endfunction
 function! FindPlaceForImport(pkg, name)
 " Find the appropriate place to insert a "from pkg import name" line.
 
-    1                               " Go to the top
-    silent! 0/^"""/;/^"""/          " Skip docstring, if it exists
-    silent! /^import\|^from/        " Find the first import statement
+    " Go to the top (use 'normal gg' because I want to set the ' mark)
+    normal gg
+    keepjumps silent! 0/^"""/;/^"""/          " Skip docstring, if it exists
+    keepjumps silent! /^import\|^from/        " Find the first import statement
     " Find the first empty line after that.  NOTE: DO NOT put any comments
     " on the line that says `normal`, or you'll get 24 extra spaces here
-    normal }
+    keepjumps normal }
     " Try to find an existing import from the same package, and move to
     " the last one of these
     let stmt = "from ".a:pkg." import"
-    exec "silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
+    exec "keepjumps silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
 endfunction
 
 function! ImportName(name, here)
@@ -114,7 +115,7 @@ function! ImportName(name, here)
 
     " Find the place for adding the import statement
     if !a:here
-        if search('^from ' . pkg . ' import ' . l:name . '$', 'bcw')
+        if search('^from ' . pkg . ' import ' . l:name . '$', 'bcsw')
             " import already exists
             return
         endif
