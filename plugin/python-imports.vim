@@ -26,7 +26,9 @@
 " Needs Vim 7.0
 
 " Hardcoded names and locations
-let g:pythonImports = {'removeSecurityProxy': 'zope.security.proxy'}
+let g:pythonImports = {}
+let g:pythonImports['removeSecurityProxy'] = 'zope.security.proxy'
+let g:pythonImports['implements'] = 'zope.interface'
 
 function! CurrentPythonModule()
 " Figure out the dotted module name of the current buffer
