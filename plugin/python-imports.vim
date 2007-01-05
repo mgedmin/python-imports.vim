@@ -66,6 +66,10 @@ function! FindPlaceForImport(pkg, name)
     " Find the first empty line after that.  NOTE: DO NOT put any comments
     " on the line that says `normal`, or you'll get 24 extra spaces here
     normal }
+    " Try to find an existing import from the same package, and move to
+    " the last one of these
+    let stmt = "from ".a:pkg." import"
+    exec "silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
 endfunction
 
 function! ImportName(name, here)
