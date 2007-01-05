@@ -69,10 +69,18 @@ function! FindPlaceForImport(pkg, name)
     " Find the first empty line after that.  NOTE: DO NOT put any comments
     " on the line that says `normal`, or you'll get 24 extra spaces here
     keepjumps normal }
-    " Try to find an existing import from the same package, and move to
+    " Try to find an existing import from the same module, and move to
     " the last one of these
-    let stmt = "from ".a:pkg." import"
-    exec "keepjumps silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
+    let pkg = a:pkg
+    while pkg != ""
+        let stmt = "from ".pkg."[ .]"
+        if search('^' . stmt, 'cnw')
+            exec "keepjumps silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
+            break
+        endif
+        " If not found, look for imports coming from containing packages
+        let pkg = substitute(pkg, '[.][^.]*$', '', '')
+    endwhile
 endfunction
 
 function! ImportName(name, here)
