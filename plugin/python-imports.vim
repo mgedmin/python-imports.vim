@@ -112,6 +112,10 @@ function! ImportName(name, here)
 
     " Find the place for adding the import statement
     if !a:here
+        if search('^from ' . pkg . ' import ' . l:name . '$', 'bcw')
+            " import already exists
+            return
+        endif
         call FindPlaceForImport(pkg, l:name)
     endif
     " Find out the indentation of the current line
