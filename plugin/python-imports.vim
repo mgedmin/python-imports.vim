@@ -115,8 +115,10 @@ function! ImportName(name, here)
 
     " Find the place for adding the import statement
     if !a:here
-        if search('^from ' . pkg . ' import ' . l:name . '$', 'bcsw')
+        if search('^from ' . pkg . ' import ' . l:name . '$', 'bcnw')
             " import already exists
+            redraw
+            echomsg l:name . " is already imported"
             return
         endif
         call FindPlaceForImport(pkg, l:name)
