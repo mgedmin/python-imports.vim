@@ -73,7 +73,12 @@ function! FindPlaceForImport(pkg, name)
     " the last one of these
     let pkg = a:pkg
     while pkg != ""
-        let stmt = "from ".pkg."[ .]"
+        let stmt = "from ".pkg." "      " look for an exact match first
+        if search('^' . stmt, 'cnw')
+            exec "keepjumps silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
+            break
+        endif
+        let stmt = "from ".pkg."."      " try siblings or subpackages
         if search('^' . stmt, 'cnw')
             exec "keepjumps silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
             break
