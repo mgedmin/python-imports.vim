@@ -84,7 +84,11 @@ function! FindPlaceForImport(pkg, name)
             break
         endif
         " If not found, look for imports coming from containing packages
-        let pkg = substitute(pkg, '[.][^.]*$', '', '')
+        if pkg =~ '[.]'
+            let pkg = substitute(pkg, '[.][^.]*$', '', '')
+        else
+            break
+        endif
     endwhile
 endfunction
 
