@@ -25,6 +25,10 @@
 "
 " Needs Vim 7.0
 
+if v:version < 700
+    finish
+endif
+
 " Hardcoded names and locations
 let g:pythonImports = {}
 let g:pythonImports['removeSecurityProxy'] = 'zope.security.proxy'
