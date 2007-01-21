@@ -33,6 +33,7 @@ endif
 let g:pythonImports = {}
 let g:pythonImports['removeSecurityProxy'] = 'zope.security.proxy'
 let g:pythonImports['implements'] = 'zope.interface'
+let g:pythonImports['transaction'] = ''
 
 function! CurrentPythonModule()
 " Figure out the dotted module name of the current buffer
@@ -134,9 +135,15 @@ function! ImportName(name, here)
         endif
     endif
 
+    if pkg == ""
+        let line_to_insert = 'import ' . l:name
+    else
+        let line_to_insert = 'from ' . pkg . ' import ' . l:name
+    endif
+
     " Find the place for adding the import statement
     if !a:here
-        if search('^from ' . pkg . ' import ' . l:name . '$', 'bcnw')
+        if search('^' . line_to_insert . '$', 'bcnw')
             " import already exists
             redraw
             echomsg l:name . " is already imported"
@@ -147,7 +154,7 @@ function! ImportName(name, here)
     " Find out the indentation of the current line
     let indent = matchstr(getline("."), "^[ \t]*\\%(>>> \\)\\=")
     " Add an import statement
-    put! = indent . 'from ' . pkg . ' import ' . l:name
+    put! = indent . line_to_insert
 endf
 
 command! -nargs=? -complete=tag ImportName	call ImportName(<q-args>, 0)
