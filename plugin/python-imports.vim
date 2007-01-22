@@ -33,6 +33,7 @@ endif
 let g:pythonImports = {}
 let g:pythonImports['removeSecurityProxy'] = 'zope.security.proxy'
 let g:pythonImports['implements'] = 'zope.interface'
+let g:pythonImports['Interface'] = 'zope.interface'
 let g:pythonImports['transaction'] = ''
 
 function! CurrentPythonModule()
