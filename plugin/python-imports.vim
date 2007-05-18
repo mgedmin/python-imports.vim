@@ -61,7 +61,6 @@ function! CurrentPythonModule()
     let pkg = substitute(pkg, "[.]_[a-zA-Z0-9_]*$", "", "")
     " Convert top-level zc_foo/zope_foo names into zc.foo/zope.foo
     let pkg = substitute(pkg, '^\([a-z]\+\)_\([a-z]\+\)', '\1.\2', "")
-    " Close the window containing the tag
     return pkg
 endfunction
 
