@@ -36,6 +36,7 @@ let g:pythonImports['implements'] = 'zope.interface'
 let g:pythonImports['Interface'] = 'zope.interface'
 let g:pythonImports['transaction'] = ''
 let g:pythonImports['setup'] = 'zope.app.testing'
+let g:pythonImports['Browser'] = 'zope.testbrowser'
 
 function! CurrentPythonModule()
 " Figure out the dotted module name of the current buffer
