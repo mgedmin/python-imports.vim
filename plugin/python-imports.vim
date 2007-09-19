@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 0.2
-" Last Modified: 2007-01-05
+" Version: 0.3
+" Last Modified: 2007-09-19
 "
 " Overview
 " --------
@@ -34,9 +34,19 @@ let g:pythonImports = {}
 let g:pythonImports['removeSecurityProxy'] = 'zope.security.proxy'
 let g:pythonImports['implements'] = 'zope.interface'
 let g:pythonImports['Interface'] = 'zope.interface'
+let g:pythonImports['sys'] = ''
 let g:pythonImports['transaction'] = ''
 let g:pythonImports['setup'] = 'zope.app.testing'
 let g:pythonImports['Browser'] = 'zope.testbrowser'
+let g:pythonStdlibPath = '/usr/lib/python2.4'
+
+function! IsStdlibModule(name)
+" Does a:name refer to a standard library module?
+    if filereadable(g:pythonStdlibPath . "/" . a:name . ".py")
+        return 1
+    endif
+    return 0
+endf
 
 function! CurrentPythonModule()
 " Figure out the dotted module name of the current buffer
@@ -114,6 +124,8 @@ function! ImportName(name, here)
     " Look for hardcoded names
     if has_key(g:pythonImports, l:name)
         let pkg = g:pythonImports[l:name]
+    elseif IsStdlibModule(l:name)
+        let pkg = ''
     else
         " Try to jump to a tag in a new window
         let v:errmsg = ""
