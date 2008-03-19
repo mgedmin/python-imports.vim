@@ -76,6 +76,10 @@ function! CurrentPythonModule()
     let pkg = substitute(pkg, "[.]_[a-zA-Z0-9_]*$", "", "")
     " Convert top-level zc_foo/zope_foo names into zc.foo/zope.foo
     let pkg = substitute(pkg, '^\([a-z]\+\)_\([a-z]\+\)', '\1.\2', "")
+    " HAAAACK: when src/ivija is a symlink to trunk, I get trunk.foo.bar
+    "          instead of ivija.foo.bar
+    let hack = fnamemodify('src/ivija/', ':p:h:t')
+    let pkg = substitute(pkg, '^' . hack . '[.]', 'ivija.', "")
     return pkg
 endfunction
 
@@ -84,8 +88,8 @@ function! FindPlaceForImport(pkg, name)
 
     " Go to the top (use 'normal gg' because I want to set the ' mark)
     normal gg
-    keepjumps silent! 0/^"""/;/^"""/          " Skip docstring, if it exists
-    keepjumps silent! /^import\|^from/        " Find the first import statement
+    keepjumps silent! 0/^"""/;/^"""/           " Skip docstring, if it exists
+    keepjumps silent! /^import\|^from.*import/ " Find the first import statement
     " Find the first empty line after that.  NOTE: DO NOT put any comments
     " on the line that says `normal`, or you'll get 24 extra spaces here
     keepjumps normal }
