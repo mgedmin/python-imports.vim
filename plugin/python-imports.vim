@@ -41,6 +41,7 @@ let g:pythonImports['transaction'] = ''
 let g:pythonImports['Persistent'] = 'persistent'
 let g:pythonImports['setup'] = 'zope.app.testing'
 let g:pythonImports['Browser'] = 'zope.testbrowser'
+let g:pythonImports['form'] = 'zope.formlib'
 let g:pythonStdlibPath = '/usr/lib/python2.4'
 
 function! IsStdlibModule(name)
