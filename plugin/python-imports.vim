@@ -31,6 +31,7 @@ endif
 
 " Hardcoded names and locations
 let g:pythonImports = {}
+let g:pythonImports['defaultdict'] = 'collections'
 let g:pythonImports['removeSecurityProxy'] = 'zope.security.proxy'
 let g:pythonImports['implements'] = 'zope.interface'
 let g:pythonImports['directlyProvides'] = 'zope.interface'
