@@ -46,6 +46,7 @@ let g:pythonImports['Browser'] = 'zope.testbrowser'
 let g:pythonImports['form'] = 'zope.formlib'
 let g:pythonImports['provideUtility'] = 'zope.component'
 let g:pythonImports['provideAdapter'] = 'zope.component'
+let g:pythonImports['coverage'] = 'profilehooks'
 let g:pythonStdlibPath = '/usr/lib/python2.4'
 
 function! IsStdlibModule(name)
