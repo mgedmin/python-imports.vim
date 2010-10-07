@@ -54,6 +54,9 @@ function! IsStdlibModule(name)
     if filereadable(g:pythonStdlibPath . "/" . a:name . ".py")
         return 1
     endif
+    if filereadable(g:pythonStdlibPath . "/" . a:name . "/__init__.py")
+        return 1
+    endif
     if filereadable(g:pythonStdlibPath . "/lib-dynload/" . a:name . ".so")
         return 1
     endif
