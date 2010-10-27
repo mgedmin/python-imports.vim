@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 0.3
-" Last Modified: 2007-09-19
+" Version: 0.4
+" Last Modified: 2010-10-22
 "
 " Overview
 " --------
@@ -24,6 +24,8 @@
 " 2. Run Vim and open any python file.
 "
 " Needs Vim 7.0
+"
+" Tested on Linux only.
 
 if v:version < 700
     finish
@@ -37,8 +39,6 @@ let g:pythonImports['implements'] = 'zope.interface'
 let g:pythonImports['directlyProvides'] = 'zope.interface'
 let g:pythonImports['Interface'] = 'zope.interface'
 let g:pythonImports['Attribute'] = 'zope.interface'
-let g:pythonImports['sys'] = ''
-let g:pythonImports['itertools'] = ''
 let g:pythonImports['transaction'] = ''
 let g:pythonImports['Persistent'] = 'persistent'
 let g:pythonImports['setup'] = 'zope.app.testing'
@@ -47,7 +47,14 @@ let g:pythonImports['form'] = 'zope.formlib'
 let g:pythonImports['provideUtility'] = 'zope.component'
 let g:pythonImports['provideAdapter'] = 'zope.component'
 let g:pythonImports['coverage'] = 'profilehooks'
-let g:pythonStdlibPath = '/usr/lib/python2.4'
+let g:pythonImports['StringIO'] = 'cStringIO'
+let g:pythonStdlibPath = '/usr/lib/python2.6'
+
+if has("python")
+  python import sys
+  python vim.command("let g:pythonStdlibPath = '/usr/lib/python%d.%d'" % sys.version_info[:2])
+  python for m in sys.builtin_module_names: vim.command("let g:pythonImports['%s'] = ''" % m)
+endif
 
 function! IsStdlibModule(name)
 " Does a:name refer to a standard library module?
