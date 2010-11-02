@@ -102,6 +102,12 @@ function! CurrentPythonModule()
     return pkg
 endfunction
 
+function! CurrentPythonPackage()
+    let pkg = CurrentPythonModule()
+    let pkg = substitute(pkg, '[.]\=[^.]\+$', '', '')
+    return pkg
+endfunction
+
 function! FindPlaceForImport(pkg, name)
 " Find the appropriate place to insert a "from pkg import name" line.
 
@@ -156,10 +162,27 @@ function! ImportName(name, here)
         " Try to jump to a tag in a new window
         let v:errmsg = ""
         let l:oldfile = expand('%')
-        exec "stjump" l:name
+        exec "silent! stjump" l:name
         if v:errmsg != ""
-            " Give up and bail out
-            return
+            let err = v:errmsg
+            let v:errmsg = ""
+            exec "silent! stjump" l:name . ".py"
+            if v:errmsg != ""
+                " Give up and bail out
+                echohl ErrorMsg | echo err | echohl None
+                return
+            endif
+            if l:oldfile == expand('%')
+                " Either the user aborted the tag jump, or the tag exists in
+                " the same file, and therefore import is pointless
+                return
+            endif
+            " Look at the file name of the module that contains this tag.  Find the
+            " nearest parent directory that does not have __init__.py.  Assume it is
+            " directly included in PYTHONPATH.
+            let pkg = CurrentPythonPackage()
+            " Close the window containing the tag
+            close
         else
             if l:oldfile == expand('%')
                 " Either the user aborted the tag jump, or the tag exists in
