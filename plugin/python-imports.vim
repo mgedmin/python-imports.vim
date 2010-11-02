@@ -162,16 +162,17 @@ function! ImportName(name, here)
         " Try to jump to a tag in a new window
         let v:errmsg = ""
         let l:oldfile = expand('%')
-        exec "silent! stjump" l:name
+        exec "stjump" l:name
         if v:errmsg != ""
             let err = v:errmsg
             let v:errmsg = ""
-            exec "silent! stjump" l:name . ".py"
+            exec "stjump" l:name . ".py"
             if v:errmsg != ""
                 " Give up and bail out
-                echohl ErrorMsg | echo err | echohl None
-                return
+               return
             endif
+            echo "Ignore the error message above"
+            " how could I suppress it??
             if l:oldfile == expand('%')
                 " Either the user aborted the tag jump, or the tag exists in
                 " the same file, and therefore import is pointless
