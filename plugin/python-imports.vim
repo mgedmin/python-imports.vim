@@ -36,24 +36,27 @@ let g:pythonImports = {}
 let g:pythonImports['defaultdict'] = 'collections'
 let g:pythonImports['removeSecurityProxy'] = 'zope.security.proxy'
 let g:pythonImports['implements'] = 'zope.interface'
+let g:pythonImports['implementer'] = 'zope.interface'
 let g:pythonImports['directlyProvides'] = 'zope.interface'
 let g:pythonImports['Interface'] = 'zope.interface'
 let g:pythonImports['Attribute'] = 'zope.interface'
 let g:pythonImports['transaction'] = ''
 let g:pythonImports['Persistent'] = 'persistent'
+let g:pythonImports['TestRequest'] = 'zope.publisher.browser'
 let g:pythonImports['setup'] = 'zope.app.testing'
 let g:pythonImports['Browser'] = 'zope.testbrowser'
 let g:pythonImports['form'] = 'zope.formlib'
 let g:pythonImports['provideUtility'] = 'zope.component'
 let g:pythonImports['provideAdapter'] = 'zope.component'
+let g:pythonImports['adapts'] = 'zope.component'
 let g:pythonImports['coverage'] = 'profilehooks'
 let g:pythonImports['StringIO'] = 'cStringIO'
 let g:pythonStdlibPath = '/usr/lib/python2.6'
 
 if has("python")
-  python import sys
-  python vim.command("let g:pythonStdlibPath = '/usr/lib/python%d.%d'" % sys.version_info[:2])
-  python for m in sys.builtin_module_names: vim.command("let g:pythonImports['%s'] = ''" % m)
+    python import sys
+    python vim.command("let g:pythonStdlibPath = '/usr/lib/python%d.%d'" % sys.version_info[:2])
+    python for m in sys.builtin_module_names: vim.command("let g:pythonImports['%s'] = ''" % m)
 endif
 
 function! IsStdlibModule(name)
