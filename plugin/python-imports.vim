@@ -51,6 +51,7 @@ let g:pythonImports['provideAdapter'] = 'zope.component'
 let g:pythonImports['adapts'] = 'zope.component'
 let g:pythonImports['coverage'] = 'profilehooks'
 let g:pythonImports['StringIO'] = 'cStringIO'
+let g:pythonImports['IContainmentRoot'] = 'zope.traversing.interfaces'
 let g:pythonStdlibPath = '/usr/lib/python2.6'
 
 if has("python")
