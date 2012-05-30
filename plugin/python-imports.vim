@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 0.4
-" Last Modified: 2010-10-22
+" Version: 0.5
+" Last Modified: 2012-05-31
 "
 " Overview
 " --------
@@ -23,9 +23,18 @@
 " 1. Copy this file to $HOME/.vim/plugin directory
 " 2. Run Vim and open any python file.
 "
-" Needs Vim 7.0
+" Needs Vim 7.0, preferably built with Python support.
 "
 " Tested on Linux only.
+"
+" Configuration
+" -------------
+" In addition to the tags file (and builtin + stdlib modules), you can define
+" your favourite imports in a file called ~/.vim/python-imports.cfg.  That
+" file should contain Python import statements like
+"    import module1, module2
+"    from package.module import name1, name2
+" Continuation lines and parenthesized name lists are not supported
 
 if v:version < 700
     finish
@@ -33,35 +42,85 @@ endif
 
 " Hardcoded names and locations
 let g:pythonImports = {}
-let g:pythonImports['defaultdict'] = 'collections'
-let g:pythonImports['removeSecurityProxy'] = 'zope.security.proxy'
-let g:pythonImports['implements'] = 'zope.interface'
-let g:pythonImports['implementer'] = 'zope.interface'
-let g:pythonImports['directlyProvides'] = 'zope.interface'
-let g:pythonImports['Interface'] = 'zope.interface'
-let g:pythonImports['Attribute'] = 'zope.interface'
-let g:pythonImports['transaction'] = ''
-let g:pythonImports['Persistent'] = 'persistent'
-let g:pythonImports['TestRequest'] = 'zope.publisher.browser'
-let g:pythonImports['setup'] = 'zope.app.testing'
-let g:pythonImports['Browser'] = 'zope.testbrowser'
-let g:pythonImports['form'] = 'zope.formlib'
-let g:pythonImports['provideUtility'] = 'zope.component'
-let g:pythonImports['provideAdapter'] = 'zope.component'
-let g:pythonImports['adapts'] = 'zope.component'
-let g:pythonImports['coverage'] = 'profilehooks'
-let g:pythonImports['StringIO'] = 'cStringIO'
-let g:pythonImports['IContainmentRoot'] = 'zope.traversing.interfaces'
-let g:pythonStdlibPath = '/usr/lib/python2.6'
 
 if has("python")
     python import sys
     python vim.command("let g:pythonStdlibPath = '/usr/lib/python%d.%d'" % sys.version_info[:2])
     python for m in sys.builtin_module_names: vim.command("let g:pythonImports['%s'] = ''" % m)
+else
+    let _py_versions = glob('/usr/lib/python2.*', 1, 1)
+    if _py_versions != []
+        " use latest version (assuming glob sorts the list)
+        let g:pythonStdlibPath = py_versions[-1]
+    else
+        " what, you don't have Python installed on this machine?
+        let g:pythonStdlibPath = ""
+    endif
+endif
+
+function! LoadPythonImports(...)
+    if a:0 == 0
+        let filename = expand('~/.vim/python-imports.cfg')
+        if !filereadable(filename)
+            if &verbose > 0
+                echo "skipping" filename "because it does not exist or is not readable"
+            endif
+            return
+        endif
+    elseif a:0 == 1
+        let filename = a:1
+    else
+        echoerr "too many arguments: expected one (filename)"
+        return
+    endif
+    if &verbose > 0
+        echo "python-imports.vim: loading" filename
+    endif
+    if !has('python')
+        echoer "Need Python support: I'm not implementing a config file parser in vimscript!"
+        return
+    endif
+    python << END
+def parse_python_imports_cfg(filename, verbose=False):
+    import re
+    DOTTEDNAME = '[a-zA-Z_.][a-zA-Z_0-9.]*'
+    NAME = '[a-zA-Z_][a-zA-Z_0-9]*'
+    NAMES = NAME + r'(\s*,\s*' + NAME + ')*'
+    for line in open(filename):
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        m = re.match(r'^import\s*(' + NAMES + ')$', line)
+        if m:
+            names = m.group(1).split(',')
+            for name in names:
+                if verbose:
+                    print name.strip()
+                vim.command("let g:pythonImports['%s'] = ''" % name.strip())
+            continue
+        m = re.match(r'^from\s*(' + DOTTEDNAME + ')\s*import\s*(' + NAMES + ')$', line)
+        if m:
+            modname = m.group(1)
+            names = m.group(2).split(',')
+            for name in names:
+                if verbose:
+                    print '%s from %s' % (name.strip(), modname)
+                vim.command("let g:pythonImports['%s'] = '%s'" % (name.strip(), modname))
+            continue
+    
+parse_python_imports_cfg(vim.eval('filename'), int(vim.eval('&verbose')))
+END
+endf
+
+if has('python')
+    call LoadPythonImports()
 endif
 
 function! IsStdlibModule(name)
 " Does a:name refer to a standard library module?
+    if g:pythonStdlibPath == ""
+        return 0
+    endif
     if filereadable(g:pythonStdlibPath . "/" . a:name . ".py")
         return 1
     endif
