@@ -107,7 +107,7 @@ def parse_python_imports_cfg(filename, verbose=False):
                     print '%s from %s' % (name.strip(), modname)
                 vim.command("let g:pythonImports['%s'] = '%s'" % (name.strip(), modname))
             continue
-    
+
 parse_python_imports_cfg(vim.eval('filename'), int(vim.eval('&verbose')))
 END
 endf
