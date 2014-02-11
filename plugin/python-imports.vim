@@ -44,7 +44,7 @@ endif
 let g:pythonImports = {}
 
 if has("python")
-    python import sys
+    python import sys, vim
     python vim.command("let g:pythonStdlibPath = '/usr/lib/python%d.%d'" % sys.version_info[:2])
     python for m in sys.builtin_module_names: vim.command("let g:pythonImports['%s'] = ''" % m)
 else
