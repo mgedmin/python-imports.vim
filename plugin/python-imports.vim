@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 0.5
-" Last Modified: 2012-05-31
+" Version: 0.6
+" Last Modified: 2014-09-25
 "
 " Overview
 " --------
@@ -149,19 +149,21 @@ function! CurrentPythonModule()
     endwhile
     let pkg = strpart(pkg, strlen(root))
     " Convert the relative path into a Python dotted module name
-    let pkg = substitute(pkg, ".py$", "", "")
+    let pkg = substitute(pkg, "[.]py$", "", "")
     let pkg = substitute(pkg, ".__init__$", "", "")
-    let pkg = substitute(pkg, "^/", "", "g")
+    let pkg = substitute(pkg, "^/", "", "")
+    let pkg = substitute(pkg, "^site-packages/", "", "")
     let pkg = substitute(pkg, "/", ".", "g")
     " Get rid of the last module name if it starts with an underscore, e.g.
     " zope.schema._builtinfields -> zope.schema
     let pkg = substitute(pkg, "[.]_[a-zA-Z0-9_]*$", "", "")
     " Convert top-level zc_foo/zope_foo names into zc.foo/zope.foo
-    let pkg = substitute(pkg, '^\([a-z]\+\)_\([a-z]\+\)', '\1.\2', "")
+    " XXX: where have I found those???
+""  let pkg = substitute(pkg, '^\([a-z]\+\)_\([a-z]\+\)', '\1.\2', "")
     " HAAAACK: when src/ivija is a symlink to trunk, I get trunk.foo.bar
     "          instead of ivija.foo.bar
-    let hack = fnamemodify('src/ivija/', ':p:h:t')
-    let pkg = substitute(pkg, '^' . hack . '[.]', 'ivija.', "")
+""  let hack = fnamemodify('src/ivija/', ':p:h:t')
+""  let pkg = substitute(pkg, '^' . hack . '[.]', 'ivija.', "")
     return pkg
 endfunction
 
