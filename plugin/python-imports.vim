@@ -41,7 +41,9 @@ if v:version < 700
 endif
 
 " Hardcoded names and locations
-let g:pythonImports = {}
+" g:pythonImports[module] = '' for module imports
+" g:pythonImports[name] = 'module' for other imports
+let g:pythonImports = {'print': '__future__'}
 
 if has("python")
     python import sys, vim
@@ -180,6 +182,9 @@ function! FindPlaceForImport(pkg, name)
     normal gg
     keepjumps silent! 0/^"""/;/^"""/           " Skip docstring, if it exists
     keepjumps silent! /^import\|^from.*import/ " Find the first import statement
+    if a:pkg == '__future__'
+        return
+    endif
     " Find the first empty line after that.  NOTE: DO NOT put any comments
     " on the line that says `normal`, or you'll get 24 extra spaces here
     keepjumps normal }
@@ -266,6 +271,8 @@ function! ImportName(name, here)
 
     if pkg == ""
         let line_to_insert = 'import ' . l:name
+    elseif pkg == "__future__" && l:name == "print"
+        let line_to_insert = 'from __future__ import print_function'
     else
         let line_to_insert = 'from ' . pkg . ' import ' . l:name
     endif
