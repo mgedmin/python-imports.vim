@@ -53,7 +53,7 @@ else
     let _py_versions = glob('/usr/lib/python2.*', 1, 1)
     if _py_versions != []
         " use latest version (assuming glob sorts the list)
-        let g:pythonStdlibPath = py_versions[-1]
+        let g:pythonStdlibPath = _py_versions[-1]
     else
         " what, you don't have Python installed on this machine?
         let g:pythonStdlibPath = ""
