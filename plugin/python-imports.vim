@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 0.6
-" Last Modified: 2014-09-25
+" Version: 0.7
+" Last Modified: 2016-09-11
 "
 " Overview
 " --------
@@ -45,10 +45,11 @@ endif
 " g:pythonImports[name] = 'module' for other imports
 let g:pythonImports = {'print': '__future__'}
 
-if has("python")
-    python import sys, vim
-    python vim.command("let g:pythonStdlibPath = '/usr/lib/python%d.%d'" % sys.version_info[:2])
-    python for m in sys.builtin_module_names: vim.command("let g:pythonImports['%s'] = ''" % m)
+if has("python") || has("python3")
+    let s:python = has("python3") ? "python3" : "python"
+    exec s:python "import sys, vim"
+    exec s:python "vim.command(\"let g:pythonStdlibPath = '/usr/lib/python%d.%d'\" % sys.version_info[:2])"
+    exec s:python "for m in sys.builtin_module_names: vim.command(\"let g:pythonImports['%s'] = ''\" % m)"
 else
     let _py_versions = glob('/usr/lib/python2.*', 1, 1)
     if _py_versions != []
@@ -78,11 +79,11 @@ function! LoadPythonImports(...)
     if &verbose > 0
         echo "python-imports.vim: loading" filename
     endif
-    if !has('python')
+    if !has('python') && !has('python3')
         echoer "Need Python support: I'm not implementing a config file parser in vimscript!"
         return
     endif
-    python << END
+    exec s:python "<< END"
 def parse_python_imports_cfg(filename, verbose=False):
     import re
     DOTTEDNAME = '[a-zA-Z_.][a-zA-Z_0-9.]*'
@@ -97,7 +98,7 @@ def parse_python_imports_cfg(filename, verbose=False):
             names = m.group(1).split(',')
             for name in names:
                 if verbose:
-                    print name.strip()
+                    print(name.strip())
                 vim.command("let g:pythonImports['%s'] = ''" % name.strip())
             continue
         m = re.match(r'^from\s*(' + DOTTEDNAME + ')\s*import\s*(' + NAMES + ')$', line)
@@ -106,7 +107,7 @@ def parse_python_imports_cfg(filename, verbose=False):
             names = m.group(2).split(',')
             for name in names:
                 if verbose:
-                    print '%s from %s' % (name.strip(), modname)
+                    print('%s from %s' % (name.strip(), modname))
                 vim.command("let g:pythonImports['%s'] = '%s'" % (name.strip(), modname))
             continue
 
@@ -114,7 +115,7 @@ parse_python_imports_cfg(vim.eval('filename'), int(vim.eval('&verbose')))
 END
 endf
 
-if has('python')
+if has('python') || has('python3')
     call LoadPythonImports()
 endif
 
