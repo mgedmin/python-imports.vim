@@ -51,7 +51,7 @@ if has("python") || has("python3")
     exec s:python "vim.command(\"let g:pythonStdlibPath = '/usr/lib/python%d.%d'\" % sys.version_info[:2])"
     exec s:python "for m in sys.builtin_module_names: vim.command(\"let g:pythonImports['%s'] = ''\" % m)"
 else
-    let _py_versions = glob('/usr/lib/python2.*', 1, 1)
+    let _py_versions = glob('/usr/lib/python?.*', 1, 1)
     if _py_versions != []
         " use latest version (assuming glob sorts the list)
         let g:pythonStdlibPath = _py_versions[-1]
