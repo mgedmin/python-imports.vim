@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 0.7
-" Last Modified: 2016-09-11
+" Version: 0.8
+" Last Modified: 2017-05-24
 "
 " Overview
 " --------
@@ -230,44 +230,42 @@ function! ImportName(name, here)
     elseif IsStdlibModule(l:name)
         let pkg = ''
     else
-        " Try to jump to a tag in a new window
+        " Let's see if we have one tag, or multiple tags (in which case we'll
+        " let the user decide)
+        let tag_rx = "^\\C" . l:name . "\\([.]py\\)\\=$"
+        let found = taglist(tag_rx, expand("%"))
+        if found == []
+            " Give up and bail out
+           echohl Error | echomsg "Tag not found:" l:name | echohl None
+           return
+        endif
+        " Try to jump to the tag in a new window
         let v:errmsg = ""
         let l:oldfile = expand('%')
-        silent! exec "stjump" l:name
+        exec "stjump /" . tag_rx
         if v:errmsg != ""
-            let err = v:errmsg
-            let v:errmsg = ""
-            silent! exec "stjump" l:name . ".py"
-            if v:errmsg != ""
-                " Give up and bail out
-               echohl Error | echomsg "Tag not found:" l:name | echohl None
-               return
+            " Something bad happened (maybe the other file is opened in a
+            " different vim instance and there's a swap file)
+            if l:oldfile != expand('%')
+                close
             endif
-            " how could I suppress it??
-            if l:oldfile == expand('%')
-                " Either the user aborted the tag jump, or the tag exists in
-                " the same file, and therefore import is pointless
-                return
-            endif
-            " Look at the file name of the module that contains this tag.  Find the
-            " nearest parent directory that does not have __init__.py.  Assume it is
-            " directly included in PYTHONPATH.
-            let pkg = CurrentPythonPackage()
-            " Close the window containing the tag
-            close
-        else
-            if l:oldfile == expand('%')
-                " Either the user aborted the tag jump, or the tag exists in
-                " the same file, and therefore import is pointless
-                return
-            endif 
-            " Look at the file name of the module that contains this tag.  Find the
-            " nearest parent directory that does not have __init__.py.  Assume it is
-            " directly included in PYTHONPATH.
-            let pkg = CurrentPythonModule()
-            " Close the window containing the tag
-            close
+            return
         endif
+        if l:oldfile == expand('%')
+            " Either the user aborted the tag jump, or the tag exists in
+            " the same file, and therefore import is pointless
+            return
+        endif
+        " Look at the file name of the module that contains this tag.  Find the
+        " nearest parent directory that does not have __init__.py.  Assume it is
+        " directly included in PYTHONPATH.
+        if expand('%:t') == l:name . ".py"
+            let pkg = CurrentPythonPackage()
+        else
+            let pkg = CurrentPythonModule()
+        endif
+        " Close the window containing the tag
+        close
     endif
 
     if pkg == ""
