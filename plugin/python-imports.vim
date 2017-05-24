@@ -9,14 +9,14 @@
 "
 " You need to have a tags file built (:!ctags -R .).
 "
-" Type :ImportName <name> to add an import statement at the top.
-" Type :ImportNameHere <name> to add an import statement above the current
+" Type :ImportName [<name>] to add an import statement at the top.
+" Type :ImportNameHere [<name>] to add an import statement above the current
 " line.
 "
 " I use mappings like the following one to import the name under cursor with a
 " single keystroke
-"   map <buffer> <F5>    :ImportName <C-R><C-W><CR>
-"   map <buffer> <C-F5>  :ImportNameHere <C-R><C-W><CR>
+"   map <buffer> <F5>    :ImportName<CR>
+"   map <buffer> <C-F5>  :ImportNameHere<CR>
 "
 " Installation
 " ------------

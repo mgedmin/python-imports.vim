@@ -5,16 +5,16 @@ Vim script to help adding import statements in Python modules.
 You need to have a tags file built (``:!ctags -R .``, be sure to use
 `exuberant-ctags <http://ctags.sourceforge.net/>`_).
 
-Type ``:ImportName <name>`` to add an import statement at the top of the file.
+Type ``:ImportName [<name>]`` to add an import statement at the top of the file.
 
-Type ``:ImportNameHere <name>`` to add an import statement above the current
+Type ``:ImportNameHere [<name>]`` to add an import statement above the current
 line.
 
 I use the following mappings to import the name under cursor with a single
 keystroke::
 
-  map <F5>    :ImportName <C-R><C-W><CR>
-  map <C-F5>  :ImportNameHere <C-R><C-W><CR>
+  map <F5>    :ImportName<CR>
+  map <C-F5>  :ImportNameHere<CR>
 
 Needs Vim 7.0, preferably built with Python support.
 
