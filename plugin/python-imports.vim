@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 0.8
-" Last Modified: 2017-05-24
+" Version: 0.9
+" Last Modified: 2017-09-04
 "
 " Overview
 " --------
@@ -242,7 +242,9 @@ function! ImportName(name, here)
         " Try to jump to the tag in a new window
         let v:errmsg = ""
         let l:oldfile = expand('%')
+        let l:oldswb = &switchbuf
         exec "stjump /" . tag_rx
+        let &switchbuf = l:oldswb
         if v:errmsg != ""
             " Something bad happened (maybe the other file is opened in a
             " different vim instance and there's a swap file)
