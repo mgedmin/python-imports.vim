@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 0.9
-" Last Modified: 2017-09-04
+" Version: 1.0
+" Last Modified: 2017-11-09
 "
 " Overview
 " --------
@@ -243,8 +243,12 @@ function! ImportName(name, here)
         let v:errmsg = ""
         let l:oldfile = expand('%')
         let l:oldswb = &switchbuf
-        exec "stjump /" . tag_rx
-        let &switchbuf = l:oldswb
+        set switchbuf=split
+        try
+            exec "stjump /" . tag_rx
+        finally
+            let &switchbuf = l:oldswb
+        endtry
         if v:errmsg != ""
             " Something bad happened (maybe the other file is opened in a
             " different vim instance and there's a swap file)
