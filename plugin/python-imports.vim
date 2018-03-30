@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 1.0
-" Last Modified: 2017-11-09
+" Version: 1.1
+" Last Modified: 2018-03-31
 "
 " Overview
 " --------
@@ -183,6 +183,7 @@ function! FindPlaceForImport(pkg, name)
     normal gg
     keepjumps silent! 0/^"""/;/^"""/           " Skip docstring, if it exists
     keepjumps silent! /^import\|^from.*import/ " Find the first import statement
+    nohlsearch
     if a:pkg == '__future__'
         return
     endif
@@ -196,11 +197,13 @@ function! FindPlaceForImport(pkg, name)
         let stmt = "from ".pkg." "      " look for an exact match first
         if search('^' . stmt, 'cnw')
             exec "keepjumps silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
+            nohlsearch
             break
         endif
         let stmt = "from ".pkg."."      " try siblings or subpackages
         if search('^' . stmt, 'cnw')
             exec "keepjumps silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
+            nohlsearch
             break
         endif
         " If not found, look for imports coming from containing packages
@@ -212,10 +215,11 @@ function! FindPlaceForImport(pkg, name)
     endwhile
 endfunction
 
-function! ImportName(name, here)
+function! ImportName(name, here, stay)
 " Add an import statement for 'name'.  If 'here' is true, adds the statement
 " on the line above the cursor, if 'here' is false, adds the line to the top
-" of the current file.
+" of the current file.  If 'stay' is true, keeps cursor position, otherwise
+" jumps to the line containing the newly added import statement.
 
     " If name is empty, pick up the word under cursor
     if a:name == ""
@@ -294,9 +298,30 @@ function! ImportName(name, here)
     endif
     " Find out the indentation of the current line
     let indent = matchstr(getline("."), "^[ \t]*\\%(>>> \\)\\=")
-    " Add an import statement
-    put! = indent . line_to_insert
+    " Check if we're using parenthesized imports already
+    if indent != "" && getline(line(".")-1) == 'from ' . pkg . ' import ('
+        let line_to_insert = l:name . ','
+    endif
+    let line_to_insert = indent . line_to_insert
+    " Double check with indent / parenthesized form
+    if search('^' . line_to_insert . '$', 'cnw')
+        " import already exists
+        redraw
+        echomsg l:name . " is already imported"
+        return
+    endif
+    " Add the import statement
+    put! =line_to_insert
+    " Jump back if possible
+    if a:stay
+        normal ``
+    endif
+    " Refresh ALE because otherwise it gets all confused for a bit
+    if exists("*ALELint")
+        ALEResetBuffer
+        ALELint
+    endif
 endf
 
-command! -nargs=? -complete=tag ImportName	call ImportName(<q-args>, 0)
-command! -nargs=? -complete=tag ImportNameHere	call ImportName(<q-args>, 1)
+command! -nargs=? -bang -complete=tag ImportName	call ImportName(<q-args>, 0, <q-bang> == "!")
+command! -nargs=? -bang -complete=tag ImportNameHere	call ImportName(<q-args>, 1, <q-bang> == "!")
