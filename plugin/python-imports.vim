@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 1.1
-" Last Modified: 2018-03-31
+" Version: 1.2
+" Last Modified: 2018-05-14
 "
 " Overview
 " --------
@@ -248,6 +248,7 @@ function! ImportName(name, here, stay)
         let l:oldfile = expand('%')
         let l:oldswb = &switchbuf
         set switchbuf=split
+        let l:oldwinnr = winnr()
         try
             exec "stjump /" . tag_rx
         finally
@@ -258,6 +259,7 @@ function! ImportName(name, here, stay)
             " different vim instance and there's a swap file)
             if l:oldfile != expand('%')
                 close
+                exec l:oldwinnr "wincmd w"
             endif
             return
         endif
@@ -276,6 +278,8 @@ function! ImportName(name, here, stay)
         endif
         " Close the window containing the tag
         close
+        " Return to the right window
+        exec l:oldwinnr "wincmd w"
     endif
 
     if pkg == ""
