@@ -237,7 +237,7 @@ function! ImportName(name, here, stay)
         " Let's see if we have one tag, or multiple tags (in which case we'll
         " let the user decide)
         let tag_rx = "^\\C" . l:name . "\\([.]py\\)\\=$"
-        let found = taglist(tag_rx, expand("%"))
+        let found = taglist(tag_rx)
         if found == []
             " Give up and bail out
            echohl Error | echomsg "Tag not found:" l:name | echohl None
