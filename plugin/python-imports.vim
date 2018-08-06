@@ -61,6 +61,16 @@ else
     endif
 endif
 
+if v:version >= 801 || v:version == 800 && has("patch-499")
+    function! s:taglist(tag, filename)
+        return taglist(a:tag, a:filename)
+    endf
+else
+    function! s:taglist(tag, filename)
+        return taglist(a:tag)
+    endf
+endif
+
 function! LoadPythonImports(...)
     if a:0 == 0
         let filename = expand('~/.vim/python-imports.cfg')
@@ -237,7 +247,7 @@ function! ImportName(name, here, stay)
         " Let's see if we have one tag, or multiple tags (in which case we'll
         " let the user decide)
         let tag_rx = "^\\C" . l:name . "\\([.]py\\)\\=$"
-        let found = taglist(tag_rx, expand("%"))
+        let found = s:taglist(tag_rx, expand("%"))
         if found == []
             " Give up and bail out
            echohl Error | echomsg "Tag not found:" l:name | echohl None
