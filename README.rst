@@ -3,7 +3,10 @@ Overview
 Vim script to help adding import statements in Python modules.
 
 You need to have a tags file built (``:!ctags -R .``, be sure to use
-`exuberant-ctags <http://ctags.sourceforge.net/>`_).
+`exuberant-ctags <http://ctags.sourceforge.net/>`_ or `Universal
+Ctags <https://ctags.io/>`_). You can use `Gutentags
+<https://github.com/ludovicchabant/vim-gutentags>`__ plugin for
+automatic tags management.
 
 Type ``:ImportName [<name>]`` to add an import statement at the top of the file.
 
