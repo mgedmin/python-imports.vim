@@ -57,6 +57,10 @@ if has("python") || has("python3")
         let g:pythonBuiltinModules = {}
         exec s:python "for m in sys.builtin_module_names: vim.command(\"let g:pythonBuiltinModules['%s'] = ''\" % m)"
     endif
+    if !exists("g:pythonExtModuleSuffix")
+        exec s:python "import sysconfig"
+        let g:pythonExtModuleSuffix = pyxeval("sysconfig.get_config_var('EXT_SUFFIX') or '.so'")
+    endif
 elseif !exists("g:pythonStdlibPath")
     let _py_versions = glob('/usr/lib/python?.*', 1, 1)
     if _py_versions != []
@@ -66,6 +70,10 @@ elseif !exists("g:pythonStdlibPath")
         " what, you don't have Python installed on this machine?
         let g:pythonStdlibPath = ""
     endif
+endif
+
+if !exists("g:pythonExtModuleSuffix")
+    let g:pythonExtModuleSuffix = ".so"
 endif
 
 if !exists("g:pythonBuiltinModules")
@@ -178,6 +186,8 @@ function! IsStdlibModule(name)
     elseif filereadable(g:pythonStdlibPath . "/" . a:name . "/__init__.py")
         return 1
     elseif filereadable(g:pythonStdlibPath . "/lib-dynload/" . a:name . ".so")
+        return 1
+    elseif filereadable(g:pythonStdlibPath . "/lib-dynload/" . a:name . g:pythonExtModuleSuffix)
         return 1
     else
         return 0
