@@ -51,7 +51,7 @@ if has("python") || has("python3")
     let s:python = has("python3") ? "python3" : "python"
     exec s:python "import sys, vim"
     if !exists("g:pythonStdlibPath")
-        exec s:python "vim.command(\"let g:pythonStdlibPath = '%s/lib/python%d.%d'\" % (getattr(sys, 'real_prefix', sys.prefix), sys.version_info[0], sys.version_info[1]))"
+        exec s:python "vim.command(\"let g:pythonStdlibPath = '%s/lib/python%d.%d'\" % (getattr(sys, 'base_prefix', getattr(sys, 'real_prefix', sys.prefix)), sys.version_info[0], sys.version_info[1]))"
     endif
     if !exists("g:pythonBuiltinModules")
         let g:pythonBuiltinModules = {}
