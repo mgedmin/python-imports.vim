@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 1.2
-" Last Modified: 2018-05-14
+" Version: 1.3
+" Last Modified: 2018-12-20
 "
 " Overview
 " --------
@@ -43,14 +43,21 @@ endif
 " Hardcoded names and locations
 " g:pythonImports[module] = '' for module imports
 " g:pythonImports[name] = 'module' for other imports
-let g:pythonImports = {'print': '__future__'}
+if !exists("g:pythonImports")
+    let g:pythonImports = {'print': '__future__'}
+endif
 
 if has("python") || has("python3")
     let s:python = has("python3") ? "python3" : "python"
     exec s:python "import sys, vim"
-    exec s:python "vim.command(\"let g:pythonStdlibPath = '/usr/lib/python%d.%d'\" % sys.version_info[:2])"
-    exec s:python "for m in sys.builtin_module_names: vim.command(\"let g:pythonImports['%s'] = ''\" % m)"
-else
+    if !exists("g:pythonStdlibPath")
+        exec s:python "vim.command(\"let g:pythonStdlibPath = '%s/lib/python%d.%d'\" % (getattr(sys, 'real_prefix', sys.prefix), sys.version_info[0], sys.version_info[1]))"
+    endif
+    if !exists("g:pythonBuiltinModules")
+        let g:pythonBuiltinModules = {}
+        exec s:python "for m in sys.builtin_module_names: vim.command(\"let g:pythonBuiltinModules['%s'] = ''\" % m)"
+    endif
+elseif !exists("g:pythonStdlibPath")
     let _py_versions = glob('/usr/lib/python?.*', 1, 1)
     if _py_versions != []
         " use latest version (assuming glob sorts the list)
@@ -59,6 +66,37 @@ else
         " what, you don't have Python installed on this machine?
         let g:pythonStdlibPath = ""
     endif
+endif
+
+if !exists("g:pythonBuiltinModules")
+    " based on python3.6 on linux, with all private ones removed
+    let g:pythonBuiltinModules = {
+          \ 'array': '',
+          \ 'atexit': '',
+          \ 'binascii': '',
+          \ 'builtins': '',
+          \ 'cmath': '',
+          \ 'errno': '',
+          \ 'faulthandler': '',
+          \ 'fcntl': '',
+          \ 'gc': '',
+          \ 'grp': '',
+          \ 'itertools': '',
+          \ 'marshal': '',
+          \ 'math': '',
+          \ 'posix': '',
+          \ 'pwd': '',
+          \ 'pyexpat': '',
+          \ 'select': '',
+          \ 'spwd': '',
+          \ 'sys': '',
+          \ 'syslog': '',
+          \ 'time': '',
+          \ 'unicodedata': '',
+          \ 'xxsubtype': '',
+          \ 'zipimport': '',
+          \ 'zlib': '',
+          \ }
 endif
 
 if v:version >= 801 || v:version == 800 && has("patch-499")
@@ -131,19 +169,19 @@ endif
 
 function! IsStdlibModule(name)
 " Does a:name refer to a standard library module?
-    if g:pythonStdlibPath == ""
+    if has_key(g:pythonBuiltinModules, a:name)
+        return 1
+    elseif g:pythonStdlibPath == ""
+        return 0
+    elseif filereadable(g:pythonStdlibPath . "/" . a:name . ".py")
+        return 1
+    elseif filereadable(g:pythonStdlibPath . "/" . a:name . "/__init__.py")
+        return 1
+    elseif filereadable(g:pythonStdlibPath . "/lib-dynload/" . a:name . ".so")
+        return 1
+    else
         return 0
     endif
-    if filereadable(g:pythonStdlibPath . "/" . a:name . ".py")
-        return 1
-    endif
-    if filereadable(g:pythonStdlibPath . "/" . a:name . "/__init__.py")
-        return 1
-    endif
-    if filereadable(g:pythonStdlibPath . "/lib-dynload/" . a:name . ".so")
-        return 1
-    endif
-    return 0
 endf
 
 function! CurrentPythonModule()
@@ -170,13 +208,6 @@ function! CurrentPythonModule()
     " Get rid of the last module name if it starts with an underscore, e.g.
     " zope.schema._builtinfields -> zope.schema
     let pkg = substitute(pkg, "[.]_[a-zA-Z0-9_]*$", "", "")
-    " Convert top-level zc_foo/zope_foo names into zc.foo/zope.foo
-    " XXX: where have I found those???
-""  let pkg = substitute(pkg, '^\([a-z]\+\)_\([a-z]\+\)', '\1.\2', "")
-    " HAAAACK: when src/ivija is a symlink to trunk, I get trunk.foo.bar
-    "          instead of ivija.foo.bar
-""  let hack = fnamemodify('src/ivija/', ':p:h:t')
-""  let pkg = substitute(pkg, '^' . hack . '[.]', 'ivija.', "")
     return pkg
 endfunction
 
