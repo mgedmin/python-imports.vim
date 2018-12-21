@@ -59,7 +59,9 @@ if has("python") || has("python3")
     endif
     if !exists("g:pythonExtModuleSuffix")
         exec s:python "import sysconfig"
-        let g:pythonExtModuleSuffix = pyxeval("sysconfig.get_config_var('EXT_SUFFIX') or '.so'")
+        " grr neovim doesn't have pyxeval()
+        let s:expr = "sysconfig.get_config_var('EXT_SUFFIX') or '.so'"
+        let g:pythonExtModuleSuffix = has("python3") ? py3eval(s:expr) : pyeval(s:expr)
     endif
 elseif !exists("g:pythonStdlibPath")
     let _py_versions = glob('/usr/lib/python?.*', 1, 1)
