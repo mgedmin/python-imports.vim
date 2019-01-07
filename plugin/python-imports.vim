@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 1.3
-" Last Modified: 2018-12-20
+" Version: 1.4
+" Last Modified: 2019-01-07
 "
 " Overview
 " --------
@@ -34,7 +34,13 @@
 " file should contain Python import statements like
 "    import module1, module2
 "    from package.module import name1, name2
-" Continuation lines and parenthesized name lists are not supported
+" Continuation lines are not supported.
+" Parenthesized name lists are partially supported, if you use one name per
+" line, i.e.
+"    from package.module import (
+"        name1,
+"        name2,
+"    )
 
 if v:version < 700
     finish
@@ -356,8 +362,17 @@ function! ImportName(name, here, stay)
     " Find out the indentation of the current line
     let indent = matchstr(getline("."), "^[ \t]*\\%(>>> \\)\\=")
     " Check if we're using parenthesized imports already
-    if indent != "" && getline(line(".")-1) == 'from ' . pkg . ' import ('
+    echomsg "checking for " . pkg . " import"
+    let prev_line = getline(line(".")-1)
+    if indent != "" && prev_line  == 'from ' . pkg . ' import ('
         let line_to_insert = l:name . ','
+    elseif indent != "" && prev_line =~ '^from .* import ('
+        silent! /)/+1
+        nohlsearch
+        if line(".") == line("$") && getline(line(".")-1) !~ ')'
+            put =''
+        endif
+        let indent = ""
     endif
     let line_to_insert = indent . line_to_insert
     " Double check with indent / parenthesized form

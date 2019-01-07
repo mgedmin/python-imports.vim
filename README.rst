@@ -44,11 +44,16 @@ library modules), you can define your favourite imports in a file called
 ``~/.vim/python-imports.cfg``.  That file should contain Python import
 statements like ::
 
-   import module1, module2
-   from package.module import name1, name2
+    import module1, module2
+    from package.module import name1, name2
 
-Continuation lines and parenthesized name lists are not supported, comments
-*are* supported.  There's an example here.
+Continuation lines are not supported.  Parenthesized name lists are partially
+supported, if you use one name per line, i.e. ::
+
+    from package.module import (
+        name1,
+        name2,
+    )
 
 
 Copyright
