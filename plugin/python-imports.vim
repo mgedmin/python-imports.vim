@@ -362,7 +362,6 @@ function! ImportName(name, here, stay)
     " Find out the indentation of the current line
     let indent = matchstr(getline("."), "^[ \t]*\\%(>>> \\)\\=")
     " Check if we're using parenthesized imports already
-    echomsg "checking for " . pkg . " import"
     let prev_line = getline(line(".")-1)
     if indent != "" && prev_line  == 'from ' . pkg . ' import ('
         let line_to_insert = l:name . ','
