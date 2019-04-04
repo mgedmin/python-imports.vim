@@ -375,7 +375,7 @@ function! ImportName(name, here, stay)
     endif
     let line_to_insert = indent . line_to_insert
     " Double check with indent / parenthesized form
-    if search('^' . line_to_insert . '$', 'cnw')
+    if !a:here && search('^' . line_to_insert . '$', 'cnw')
         " import already exists
         redraw
         echomsg l:name . " is already imported"
