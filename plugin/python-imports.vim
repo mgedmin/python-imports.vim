@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 1.4
-" Last Modified: 2019-01-07
+" Version: 1.5
+" Last Modified: 2019-04-29
 "
 " Overview
 " --------
@@ -20,8 +20,7 @@
 "
 " Installation
 " ------------
-" 1. Copy this file to $HOME/.vim/plugin directory
-" 2. Run Vim and open any python file.
+" Use a plugin manager like vim-plug please.
 "
 " Needs Vim 7.0, preferably built with Python support.
 "
@@ -203,36 +202,11 @@ function! IsStdlibModule(name)
 endf
 
 function! CurrentPythonModule()
-" Figure out the dotted module name of the current buffer
-
-    " Look at the file name of the module that contains this tag.  Find the
-    " nearest parent directory that does not have __init__.py.  Assume it is
-    " directly included in PYTHONPATH.
-    let pkg = expand("%:p")
-    let root = fnamemodify(pkg, ":h")
-    while strlen(root)
-        if !filereadable(root . "/__init__.py")
-            break
-        endif
-        let root = fnamemodify(root, ":h")
-    endwhile
-    let pkg = strpart(pkg, strlen(root))
-    " Convert the relative path into a Python dotted module name
-    let pkg = substitute(pkg, "[.]py$", "", "")
-    let pkg = substitute(pkg, ".__init__$", "", "")
-    let pkg = substitute(pkg, "^/", "", "")
-    let pkg = substitute(pkg, "^site-packages/", "", "")
-    let pkg = substitute(pkg, "/", ".", "g")
-    " Get rid of the last module name if it starts with an underscore, e.g.
-    " zope.schema._builtinfields -> zope.schema
-    let pkg = substitute(pkg, "[.]_[a-zA-Z0-9_]*$", "", "")
-    return pkg
+    return pythonimports#filename2module(expand("%"))
 endfunction
 
 function! CurrentPythonPackage()
-    let pkg = CurrentPythonModule()
-    let pkg = substitute(pkg, '[.]\=[^.]\+$', '', '')
-    return pkg
+    return pythonimports#filename2package(expand("%"))
 endfunction
 
 function! FindPlaceForImport(pkg, name)
@@ -299,46 +273,50 @@ function! ImportName(name, here, stay)
         let found = s:taglist(tag_rx, expand("%"))
         if found == []
             " Give up and bail out
-           echohl Error | echomsg "Tag not found:" l:name | echohl None
-           return
-        endif
-        " Try to jump to the tag in a new window
-        let v:errmsg = ""
-        let l:oldfile = expand('%')
-        let l:oldswb = &switchbuf
-        set switchbuf=split
-        let l:oldwinnr = winnr()
-        try
-            exec "stjump /" . tag_rx
-        finally
-            let &switchbuf = l:oldswb
-        endtry
-        if v:errmsg != ""
-            " Something bad happened (maybe the other file is opened in a
-            " different vim instance and there's a swap file)
-            if l:oldfile != expand('%')
-                close
-                exec l:oldwinnr "wincmd w"
-            endif
+            echohl Error | echomsg "Tag not found:" l:name | echohl None
             return
-        endif
-        if l:oldfile == expand('%')
-            " Either the user aborted the tag jump, or the tag exists in
-            " the same file, and therefore import is pointless
-            return
-        endif
-        " Look at the file name of the module that contains this tag.  Find the
-        " nearest parent directory that does not have __init__.py.  Assume it is
-        " directly included in PYTHONPATH.
-        if expand('%:t') == l:name . ".py"
-            let pkg = CurrentPythonPackage()
+        elseif len(found) == 1
+            " Only one name found, we can skip the selection menu and the
+            " whole costly procedure of opening split windows.
+            let pkg = pythonimports#filename2module(found[0].filename)
         else
+            " Try to jump to the tag in a new window
+            let v:errmsg = ""
+            let l:oldfile = expand('%')
+            let l:oldswb = &switchbuf
+            set switchbuf=split
+            let l:oldwinnr = winnr()
+            try
+                exec "stjump /" . tag_rx
+            finally
+                let &switchbuf = l:oldswb
+            endtry
+            if v:errmsg != ""
+                " Something bad happened (maybe the other file is opened in a
+                " different vim instance and there's a swap file)
+                if l:oldfile != expand('%')
+                    close
+                    exec l:oldwinnr "wincmd w"
+                endif
+                return
+            endif
+            if l:oldfile == expand('%')
+                " Either the user aborted the tag jump, or the tag exists in
+                " the same file, and therefore import is pointless
+                return
+            endif
+            " Look at the file name of the module that contains this tag.  Find the
+            " nearest parent directory that does not have __init__.py.  Assume it is
+            " directly included in PYTHONPATH.
             let pkg = CurrentPythonModule()
+            " Close the window containing the tag
+            close
+            " Return to the right window
+            exec l:oldwinnr "wincmd w"
         endif
-        " Close the window containing the tag
-        close
-        " Return to the right window
-        exec l:oldwinnr "wincmd w"
+        if fnamemodify(pkg, 't') == l:name . ".py"
+            let pkg = pythonimports#package_of(pkg)
+        endif
     endif
 
     if pkg == ""
