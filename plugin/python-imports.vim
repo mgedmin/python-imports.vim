@@ -287,7 +287,7 @@ function! ImportName(name, here, stay)
             set switchbuf=split
             let l:oldwinnr = winnr()
             try
-                exec "stjump /" . tag_rx
+                exec "noautocmd stjump /" . tag_rx
             finally
                 let &switchbuf = l:oldswb
             endtry
