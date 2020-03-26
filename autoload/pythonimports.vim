@@ -9,22 +9,13 @@ function! pythonimports#filename2module(filename)
 
   let found = 0
   if exists("g:python_paths")
-      for path in g:python_paths
-            if root =~ path
-                "path detected
-                while strlen(root)
-                    if root == path
-                        "echo 'found '. root
-                        let found = 1
-                        break
-                    endif
-                    let root = fnamemodify(root, ":h")
-                endwhile
-            endif
-            if found
-                break
-            endif
-      endfor
+    for path in g:python_paths
+      if root =~ path
+        let root = path
+        let found = 1
+        break
+      endif
+    endfor
   endif
 
   if !found
