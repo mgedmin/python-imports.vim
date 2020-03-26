@@ -6,12 +6,35 @@ function! pythonimports#filename2module(filename)
   " directly included in PYTHONPATH.
   let pkg = fnamemodify(a:filename, ":p")
   let root = fnamemodify(pkg, ":h")
-  while strlen(root)
-    if !filereadable(root . "/__init__.py")
-      break
-    endif
-    let root = fnamemodify(root, ":h")
-  endwhile
+
+  let found = 0
+  if exists("g:python_paths")
+      for path in g:python_paths
+            if root =~ path
+                "path detected
+                while strlen(root)
+                    if root == path
+                        "echo 'found '. root
+                        let found = 1
+                        break
+                    endif
+                    let root = fnamemodify(root, ":h")
+                endwhile
+            endif
+            if found
+                break
+            endif
+      endfor
+  endif
+
+  if !found
+    while strlen(root)
+      if !filereadable(root . "/__init__.py")
+        break
+      endif
+      let root = fnamemodify(root, ":h")
+    endwhile
+  endif
   let pkg = strpart(pkg, strlen(root))
   " Convert the relative path into a Python dotted module name
   let pkg = substitute(pkg, "[.]py$", "", "")
