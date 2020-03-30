@@ -7,17 +7,24 @@ function! pythonimports#filename2module(filename)
   let pkg = fnamemodify(a:filename, ":p")
   let root = fnamemodify(pkg, ":h")
 
+  "normalize  paths
+  let _tmp = []
+  for path in g:pythonPaths
+    call add(_tmp, expand(path:p))
+  endfor
+  let g:pythonPaths = _tmp
+
   let found_dir = ""
   let found_path = ""
   while root != ""
-    if index(g:python_paths, root) != -1
+    if index(g:pythonPaths, root:p) != -1
       let found_path = root
       break
     endif
     if found_dir == "" && !filereadable(root . "/__init__.py")
       let found_dir = root
       " note: can't break here!  PEP 420 implicit namespace packages don't have __init__.py,
-      " so we might find the actual package root in a parent directory beyond this one, via g:python_paths
+      " so we might find the actual package root in a parent directory beyond this one, via g:pythonPaths
     endif
     let root = fnamemodify(root, ":h")
   endwhile
