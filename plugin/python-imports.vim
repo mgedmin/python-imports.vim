@@ -115,7 +115,7 @@ if !exists("g:pythonBuiltinModules")
 endif
 
 if !exists("g:pythonPaths")
-    let g:pythonPathsNorm = []
+    let g:pythonPaths = []
 endif
 
 
