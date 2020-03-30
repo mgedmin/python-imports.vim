@@ -115,8 +115,17 @@ if !exists("g:pythonBuiltinModules")
 endif
 
 if !exists("g:pythonPaths")
-    let g:pythonPaths = []
+    let g:pythonPathsNorm = []
+else
+  "normalize  paths
+  let _tmp = []
+  for path in g:pythonPaths
+    let path_without_slash = substitute(expand(path), "/$", "", "")
+    call add(_tmp, path_without_slash)
+  endfor
+  let g:pythonPathsNorm = _tmp
 endif
+
 
 if v:version >= 801 || v:version == 800 && has("patch-499")
     function! s:taglist(tag, filename)
