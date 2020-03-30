@@ -7,25 +7,26 @@ function! pythonimports#filename2module(filename)
   let pkg = fnamemodify(a:filename, ":p")
   let root = fnamemodify(pkg, ":h")
 
-  let found = 0
-  if exists("g:python_paths")
-    for path in g:python_paths
-      if root =~ path
-        let root = path
-        let found = 1
-        break
-      endif
-    endfor
+  let found_dir = ""
+  let found_path = ""
+  while root != ""
+    if index(g:python_paths, root) != -1
+      let found_path = root
+      break
+    endif
+    if found_dir == "" && !filereadable(root . "/__init__.py")
+      let found_dir = root
+      " note: can't break here!  PEP 420 implicit namespace packages don't have __init__.py,
+      " so we might find the actual package root in a parent directory beyond this one, via g:python_paths
+    endif
+    let root = fnamemodify(root, ":h")
+  endwhile
+  if found_path != ""
+    let root = found_path
+  else
+    let root = found_dir
   endif
 
-  if !found
-    while strlen(root)
-      if !filereadable(root . "/__init__.py")
-        break
-      endif
-      let root = fnamemodify(root, ":h")
-    endwhile
-  endif
   let pkg = strpart(pkg, strlen(root))
   " Convert the relative path into a Python dotted module name
   let pkg = substitute(pkg, "[.]py$", "", "")
