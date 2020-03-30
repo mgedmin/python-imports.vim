@@ -114,6 +114,11 @@ if !exists("g:pythonBuiltinModules")
           \ }
 endif
 
+if !exists("g:pythonPaths")
+    let g:pythonPaths = []
+endif
+
+
 if v:version >= 801 || v:version == 800 && has("patch-499")
     function! s:taglist(tag, filename)
         return taglist(a:tag, a:filename)
