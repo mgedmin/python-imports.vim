@@ -7,7 +7,7 @@ function! pythonimports#filename2module(filename)
   let pkg = fnamemodify(a:filename, ":p")
   let root = fnamemodify(pkg, ":h")
 
-  "normalize  paths
+  " normalize paths
   let pythonPathsNorm = []
   for path in g:pythonPaths
     let path_without_slash = substitute(expand(path), "/$", "", "")
@@ -16,7 +16,7 @@ function! pythonimports#filename2module(filename)
 
   let found_dir = ""
   let found_path = ""
-  while root != ""
+  while 1
     if index(pythonPathsNorm, root) != -1
       let found_path = root
       break
@@ -26,7 +26,11 @@ function! pythonimports#filename2module(filename)
       " note: can't break here!  PEP 420 implicit namespace packages don't have __init__.py,
       " so we might find the actual package root in a parent directory beyond this one, via pythonPathsNorm
     endif
-    let root = fnamemodify(root, ":h")
+    let newroot = fnamemodify(root, ":h")
+    if newroot == root
+      break
+    endif
+    let root = newroot
   endwhile
   if found_path != ""
     let root = found_path
