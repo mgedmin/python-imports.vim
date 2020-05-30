@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 1.5
-" Last Modified: 2019-04-29
+" Version: 1.6
+" Last Modified: 2020-05-30
 "
 " Overview
 " --------
@@ -118,6 +118,9 @@ if !exists("g:pythonPaths")
     let g:pythonPaths = []
 endif
 
+if !exists("g:pythonImportsUseAleFix")
+    let g:pythonImportsUseAleFix = 1
+endif
 
 if v:version >= 801 || v:version == 800 && has("patch-499")
     function! s:taglist(tag, filename)
@@ -366,13 +369,19 @@ function! ImportName(name, here, stay)
     endif
     " Add the import statement
     put! =line_to_insert
+    " Adjust import location with isort if possible
+    if g:pythonImportsUseAleFix && exists(":ALEFix") == 2
+      ALEFix isort
+    endif
     " Jump back if possible
     if a:stay
         normal ``
     endif
     " Refresh ALE because otherwise it gets all confused for a bit
-    if exists("*ALELint")
-        ALEResetBuffer
+    if exists(":ALELint") == 2
+        if exists(":ALEResetBuffer") == 2
+            ALEResetBuffer
+        endif
         ALELint
     endif
 endf
