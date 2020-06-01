@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 1.6
-" Last Modified: 2020-05-30
+" Version: 1.7
+" Last Modified: 2020-06-01
 "
 " Overview
 " --------
@@ -20,7 +20,7 @@
 "
 " Installation
 " ------------
-" Use a plugin manager like vim-plug please.
+" I like plugin managers like vim-plug.
 "
 " Needs Vim 7.0, preferably built with Python support.
 "
@@ -34,12 +34,22 @@
 "    import module1, module2
 "    from package.module import name1, name2
 " Continuation lines are not supported.
+"
+" Bugs
+" ----
+" The logic for detecting already imported names is not very clever.
+" The logic for finding the right place to put an import is not very clever
+" either.  Sometimes it might introduce syntax errors.
+" This plugin expects you rimports to look like
+"    import module
+"    from package.module import name
 " Parenthesized name lists are partially supported, if you use one name per
 " line, i.e.
 "    from package.module import (
 "        name1,
 "        name2,
 "    )
+" Documentation is practically non-existent.
 
 if v:version < 700
     finish
@@ -155,34 +165,8 @@ function! LoadPythonImports(...)
         return
     endif
     exec s:python "<< END"
-def parse_python_imports_cfg(filename, verbose=False):
-    import re
-    DOTTEDNAME = '[a-zA-Z_.][a-zA-Z_0-9.]*'
-    NAME = '[a-zA-Z_][a-zA-Z_0-9]*'
-    NAMES = NAME + r'(\s*,\s*' + NAME + ')*'
-    for line in open(filename):
-        line = line.strip()
-        if not line or line.startswith('#'):
-            continue
-        m = re.match(r'^import\s*(' + NAMES + ')$', line)
-        if m:
-            names = m.group(1).split(',')
-            for name in names:
-                if verbose:
-                    print(name.strip())
-                vim.command("let g:pythonImports['%s'] = ''" % name.strip())
-            continue
-        m = re.match(r'^from\s*(' + DOTTEDNAME + ')\s*import\s*(' + NAMES + ')$', line)
-        if m:
-            modname = m.group(1)
-            names = m.group(2).split(',')
-            for name in names:
-                if verbose:
-                    print('%s from %s' % (name.strip(), modname))
-                vim.command("let g:pythonImports['%s'] = '%s'" % (name.strip(), modname))
-            continue
-
-parse_python_imports_cfg(vim.eval('filename'), int(vim.eval('&verbose')))
+import python_imports
+python_imports.parse_python_imports_cfg(vim.eval('filename'), int(vim.eval('&verbose')))
 END
 endf
 
@@ -261,6 +245,8 @@ function! ImportName(name, here, stay)
 " on the line above the cursor, if 'here' is false, adds the line to the top
 " of the current file.  If 'stay' is true, keeps cursor position, otherwise
 " jumps to the line containing the newly added import statement.
+
+    call pythonimports#maybe_reload_config()
 
     " If name is empty, pick up the word under cursor
     if a:name == ""

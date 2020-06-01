@@ -61,3 +61,12 @@ function! pythonimports#package_of(module)
   let pkg = substitute(a:module, '[.]\=[^.]\+$', '', '')
   return pkg
 endfunction
+
+function! pythonimports#maybe_reload_config()
+  if has('python') || has('python3')
+    " XXX: wasteful -- I should check if the file's timestamp has changed
+    " instead of parsing it every time
+    pyx import python_imports
+    pyx python_imports.parse_python_imports_cfg()
+  endif
+endfunction
