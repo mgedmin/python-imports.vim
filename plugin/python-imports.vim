@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 1.7
-" Last Modified: 2020-06-01
+" Version: 1.8
+" Last Modified: 2020-11-15
 "
 " Overview
 " --------
@@ -356,7 +356,7 @@ function! ImportName(name, here, stay)
     " Add the import statement
     put! =line_to_insert
     " Adjust import location with isort if possible
-    if g:pythonImportsUseAleFix && exists(":ALEFix") == 2
+    if !a:here && g:pythonImportsUseAleFix && exists(":ALEFix") == 2
       ALEFix isort
     endif
     " Jump back if possible
