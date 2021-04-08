@@ -40,6 +40,7 @@ function! pythonimports#filename2module(filename)
 
   let pkg = strpart(pkg, strlen(root))
   " Convert the relative path into a Python dotted module name
+  let pkg = substitute(pkg, "\\", "/", "g") " Handle Windows paths
   let pkg = substitute(pkg, "[.]py$", "", "")
   let pkg = substitute(pkg, ".__init__$", "", "")
   let pkg = substitute(pkg, "^/", "", "")
