@@ -38,18 +38,14 @@ function! pythonimports#filename2module(filename)
     let root = found_dir
   endif
 
-  let path_sep = "/"
-  if has("win32")
-      let path_sep = "\\"
-  endif
-
   let pkg = strpart(pkg, strlen(root))
   " Convert the relative path into a Python dotted module name
+  let pkg = substitute(pkg, "\\", "/", "g") " Handle Windows paths
   let pkg = substitute(pkg, "[.]py$", "", "")
   let pkg = substitute(pkg, ".__init__$", "", "")
-  let pkg = substitute(pkg, "^" . path_sep, "", "")
+  let pkg = substitute(pkg, "^/", "", "")
   let pkg = substitute(pkg, "^site-packages/", "", "")
-  let pkg = substitute(pkg, path_sep, ".", "g")
+  let pkg = substitute(pkg, "/", ".", "g")
   " Get rid of the last module name if it starts with an underscore, e.g.
   " zope.schema._builtinfields -> zope.schema
   let pkg = substitute(pkg, "[.]_[a-zA-Z0-9_]*$", "", "")
