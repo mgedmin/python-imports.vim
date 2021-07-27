@@ -84,7 +84,7 @@ could be used ::
         \ ]
 
 Note that the ``expand()`` is used here so that the Home directory (``~``)
-to be interpreted correctly.
+will be interpreted correctly.
 
 
 Copyright
