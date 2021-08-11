@@ -56,6 +56,37 @@ supported, if you use one name per line, i.e. ::
     )
 
 
+Special Paths
+-------------
+
+Aside from the project root path, some projects auto-import its sub-folders also
+in the Python path (e.g. ``apps`` or ``conf`` folders) which is usually done to
+avoid repetitive or lengthy import names. For instance,
+a project that is located in ``~/my_project`` could have an ``apps`` folder
+which has this logical structure ::
+
+    from apps.alpha import bravo
+    from apps.charlie import delta
+
+But, the project team might decide to auto-import the ``apps`` folder
+in the environment setup, so that the code will have this import format
+for convenience ::
+
+    from alpha import bravo
+    from charlie import delta
+
+To resolve these special imports correctly, the ``pythonPaths`` global variable
+could be used ::
+
+    let g:pythonPaths = [
+        \ expand('~/my_project/apps'),
+        \ expand('~/my_project/conf'),
+        \ ]
+
+Note that the ``expand()`` is used here so that the Home directory (``~``)
+will be interpreted correctly.
+
+
 Copyright
 ---------
 
