@@ -263,7 +263,7 @@ function! ImportName(name, here, stay)
     endif
 
     let alias = l:name
-    let l:name = get(g:pythonImportAliases, alias)
+    let l:name = get(g:pythonImportAliases, alias, alias)
 
     " Look for hardcoded names
     if has_key(g:pythonImports, l:name)
