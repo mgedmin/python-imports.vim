@@ -49,7 +49,8 @@
 "        name1,
 "        name2,
 "    )
-" Documentation is practically non-existent.
+" Documentation is scant.
+" Syntax errors in the config file are silently ignored.
 
 if v:version < 700
     finish

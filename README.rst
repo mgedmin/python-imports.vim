@@ -2,7 +2,7 @@ Overview
 --------
 Vim script to help adding import statements in Python modules.
 
-You need to have a tags file built (``:!ctags -R .``, be sure to use
+You need to have a tags file built (``:!ctags -R --extra=+f .``, be sure to use
 `exuberant-ctags <http://ctags.sourceforge.net/>`_ or `Universal
 Ctags <https://ctags.io/>`_). You can use `Gutentags
 <https://github.com/ludovicchabant/vim-gutentags>`__ plugin for
@@ -19,7 +19,9 @@ keystroke::
   map <F5>    :ImportName<CR>
   map <C-F5>  :ImportNameHere<CR>
 
-Needs Vim 7.0, preferably built with Python support.
+Needs Vim 7.0, preferably built with Python 3 support.  (It will still work
+without Python, but functionality will be degraded, e.g. the configuration file
+will be ignored.)
 
 Tested on Linux only.
 
@@ -27,13 +29,13 @@ Tested on Linux only.
 Installation
 ------------
 
-I recommend `Vundle <https://github.com/gmarik/vundle>`_, `pathogen
-<https://github.com/tpope/vim-pathogen>`_ or `Vim Addon Manager
-<https://github.com/MarcWeber/vim-addon-manager>`_.  E.g. with Vundle do ::
+I recommend `vim-plug <https://github.com/junegunn/vim-plug>`_ ::
 
-  :BundleInstall "mgedmin/python-imports.vim"
-
-Manual installation: copy ``plugin/python-imports.vim`` to ``~/.vim/plugin/``.
+  call plug#begin()
+  ...
+  Plug 'mgedmin/python-imports.vim'
+  ...
+  call plug#end()
 
 
 Configuration
@@ -44,16 +46,54 @@ library modules), you can define your favourite imports in a file called
 ``~/.vim/python-imports.cfg``.  That file should contain Python import
 statements like ::
 
-    import module1, module2
-    from package.module import name1, name2
+    import module1, module2 as alias, module3
+    from package.module import name1, name2 as alias2, name3
 
-Continuation lines are not supported.  Parenthesized name lists are partially
-supported, if you use one name per line, i.e. ::
+Continuation lines are not supported.
 
-    from package.module import (
-        name1,
-        name2,
-    )
+This file is ignored if your Vim has no +python3 support.
+
+Additionally there are some Vim variables you can set.
+
+**g:pythonImports** is a dictionary mapping names to modules/packages from
+which they can be imported.  E.g. ::
+
+    let g:pythonImports = get(g:, 'pythonImports', {})
+    let g:pythonImports['defaultdict'] = 'collections'
+
+will make ``:ImportName defaultdict`` insert ``from collections import defaultdict``.
+You can ask for top-level module imports by using an empty string as the
+containing package::
+
+    let g:pythonImports['sqlalchemy'] = ''
+
+will make ``:ImportName sqlalchemy`` insert ``import sqlalchemy``
+
+**g:pythonImportAliases** is a dictionary mapping aliases to original names.  E.g. ::
+
+    let g:pythonImports['sqlalchemy'] = ''
+    let g:pythonImportAliasess['sa'] = 'sqlalchemy'
+
+will make ``:ImportName sa`` insert ``import sqlalchemy as sa``.
+
+**g:pythonImportsUseAleFix** makes ``:ImportName`` run ``:ALEFix isort`` after
+inserting the import, so the imports get a chance to be correctly sorted and formatted.
+This works great if you use `ALE <https://github.com/dense-analysis/ale>`_ and
+`isort <https://pycqa.github.io/isort/>`_.
+
+**g:pythonPaths** is documented in the next section.
+
+There are also the following variables that you're not expected to need to override:
+
+- **g:pythonBuiltinModules** (autodetected if possible, falls back to a
+  dictionary matching Python 3.6) is a dictionary that has all the builtin
+  modules so they can be recognized and imports for them can be created.
+
+- **g:pythonExtModuleSuffix** (autodected if possible, falls back to ".so"), used to
+  detect standard library modules that exist as .so files on disk.
+
+- **g:pythonStdlibPath** (autodetected if possible), used to detect standard library modules
+  that exist as .py or .so files on disk.
 
 
 Special Paths
