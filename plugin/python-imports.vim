@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 1.8
-" Last Modified: 2020-11-15
+" Version: 2.0
+" Last Modified: 2023-01-04
 "
 " Overview
 " --------
@@ -31,8 +31,8 @@
 " In addition to the tags file (and builtin + stdlib modules), you can define
 " your favourite imports in a file called ~/.vim/python-imports.cfg.  That
 " file should contain Python import statements like
-"    import module1, module2
-"    from package.module import name1, name2
+"    import module1, module2 as alias1, module3
+"    from package.module import name1, name2 as alias2, name3
 " Continuation lines are not supported.
 "
 " Bugs
@@ -40,7 +40,7 @@
 " The logic for detecting already imported names is not very clever.
 " The logic for finding the right place to put an import is not very clever
 " either.  Sometimes it might introduce syntax errors.
-" This plugin expects you rimports to look like
+" This plugin expects your imports to look like
 "    import module
 "    from package.module import name
 " Parenthesized name lists are partially supported, if you use one name per
@@ -60,6 +60,12 @@ endif
 " g:pythonImports[name] = 'module' for other imports
 if !exists("g:pythonImports")
     let g:pythonImports = {'print': '__future__'}
+endif
+
+" g:pythonImportAliases[alias] = name for module imports using aliases, e.g.
+" g:pythonImportAliases['sa'] = 'sqlalchemy' means that you want to 'import sqlalchemy as sa'
+if !exists("g:pythonImportAliases")
+    let g:pythonImportAliases = {}
 endif
 
 if has("python") || has("python3")
@@ -160,8 +166,8 @@ function! LoadPythonImports(...)
     if &verbose > 0
         echo "python-imports.vim: loading" filename
     endif
-    if !has('python') && !has('python3')
-        echoer "Need Python support: I'm not implementing a config file parser in vimscript!"
+    if !has('python3')
+        echoer "Need Python 3 support: I'm not implementing a config file parser in vimscript!"
         return
     endif
     exec s:python "<< END"
@@ -170,7 +176,7 @@ python_imports.parse_python_imports_cfg(vim.eval('filename'), int(vim.eval('&ver
 END
 endf
 
-if has('python') || has('python3')
+if has('python3')
     call LoadPythonImports()
 endif
 
@@ -250,10 +256,13 @@ function! ImportName(name, here, stay)
 
     " If name is empty, pick up the word under cursor
     if a:name == ""
-        let l:name = expand("<cword>")
+        let name = expand("<cword>")
     else
-        let l:name = a:name
+        let name = a:name
     endif
+
+    let alias = l:name
+    let l:name = get(g:pythonImportAliases, alias)
 
     " Look for hardcoded names
     if has_key(g:pythonImports, l:name)
@@ -320,6 +329,9 @@ function! ImportName(name, here, stay)
     else
         let line_to_insert = 'from ' . pkg . ' import ' . l:name
     endif
+    if l:alias != l:name
+        let line_to_insert .= ' as ' . l:alias
+    endif
 
     " Find the place for adding the import statement
     if !a:here
@@ -336,7 +348,11 @@ function! ImportName(name, here, stay)
     " Check if we're using parenthesized imports already
     let prev_line = getline(line(".")-1)
     if indent != "" && prev_line  == 'from ' . pkg . ' import ('
-        let line_to_insert = l:name . ','
+        if l:alias != l:name
+            let line_to_insert = l:name . ' as ' . l:alias . ','
+        else
+            let line_to_insert = l:name . ','
+        endif
     elseif indent != "" && prev_line =~ '^from .* import ('
         silent! /)/+1
         nohlsearch
