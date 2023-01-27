@@ -1,0 +1,87 @@
+Before (set up some fake tag locations):
+  let g:pythonImports['b'] = ''   " import b
+  let g:pythonImports['d'] = 'c'  " from c import d
+
+#
+# :ImportName
+#
+
+Given python (the following text in a buffer):
+  import a
+
+  def somefunc():
+      return a.x() + b.y()
+
+Do (position the cursor on 'b' and :ImportName):
+  /b\<CR>
+  :ImportName\<CR>
+
+Expect python (an import statement to be inserted):
+  import a
+  import b
+
+  def somefunc():
+      return a.x() + b.y()
+
+#
+# :ImportNameHere
+#
+
+Given python (the following text in a buffer):
+  import a
+
+  def somefunc():
+      return a.x() + b.y()
+
+Do (position the cursor on 'b' and :ImportName):
+  /b\<CR>
+  :ImportNameHere\<CR>
+
+Expect python (an import statement to be inserted):
+  import a
+
+  def somefunc():
+      import b
+      return a.x() + b.y()
+
+#
+# :ImportName with an argument
+#
+
+Given python (the following text in a buffer):
+  import a
+
+  def somefunc():
+      return a.x() + d()
+
+Do (:ImportName d):
+  :ImportName d\<CR>
+
+Expect python (an import statement to be inserted):
+  import a
+  from c import d
+
+  def somefunc():
+      return a.x() + d()
+
+#
+# :ImportNameHere with an argument
+#
+
+Given python (the following text in a buffer):
+  import a
+
+  def somefunc():
+      return a.x() + b.y()
+
+Do (position the cursor on 'b' and :ImportNameHere):
+  /b\<CR>
+  :ImportNameHere d\<CR>
+
+Expect python (an import statement to be inserted):
+  import a
+
+  def somefunc():
+      from c import d
+      return a.x() + b.y()
+
