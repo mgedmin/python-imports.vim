@@ -1,4 +1,4 @@
-function! pythonimports#filename2module(filename)
+function! python_imports#filename2module(filename)
   " Figure out the dotted module name of the given filename
 
   " Look at the file name of the module that contains this tag.  Find the
@@ -52,18 +52,18 @@ function! pythonimports#filename2module(filename)
   return pkg
 endfunction
 
-function! pythonimports#filename2package(filename)
-  let module = pythonimports#filename2module(a:filename)
-  let pkg = pythonimports#package_of(module)
+function! python_imports#filename2package(filename)
+  let module = python_imports#filename2module(a:filename)
+  let pkg = python_imports#package_of(module)
   return pkg
 endfunction
 
-function! pythonimports#package_of(module)
+function! python_imports#package_of(module)
   let pkg = substitute(a:module, '[.]\=[^.]\+$', '', '')
   return pkg
 endfunction
 
-function! pythonimports#is_stdlib_module(name)
+function! python_imports#is_stdlib_module(name)
   " Does a:name refer to a standard library module?
 
   if has_key(g:pythonBuiltinModules, a:name)
@@ -83,7 +83,7 @@ function! pythonimports#is_stdlib_module(name)
   endif
 endfunction
 
-function! pythonimports#maybe_reload_config()
+function! python_imports#maybe_reload_config()
   if has('python') || has('python3')
     " XXX: wasteful -- I should check if the file's timestamp has changed
     " instead of parsing it every time
@@ -92,7 +92,7 @@ function! pythonimports#maybe_reload_config()
   endif
 endfunction
 
-function! pythonimports#find_place_for_import(pkg, name)
+function! python_imports#find_place_for_import(pkg, name)
   " Find the appropriate place to insert a "from pkg import name" line.
   " Moves the actual cursor in the actual Vim buffer.
 
@@ -142,13 +142,13 @@ else
   endf
 endif
 
-function! pythonimports#import_name(name, here, stay)
+function! python_imports#import_name(name, here, stay)
   " Add an import statement for 'name'.  If 'here' is true, adds the statement
   " on the line above the cursor, if 'here' is false, adds the line to the top
   " of the current file.  If 'stay' is true, keeps cursor position, otherwise
   " jumps to the line containing the newly added import statement.
 
-  call pythonimports#maybe_reload_config()
+  call python_imports#maybe_reload_config()
 
   " If name is empty, pick up the word under cursor
   if a:name == ""
@@ -163,7 +163,7 @@ function! pythonimports#import_name(name, here, stay)
   " Look for hardcoded names
   if has_key(g:pythonImports, l:name)
     let pkg = g:pythonImports[l:name]
-  elseif pythonimports#is_stdlib_module(l:name)
+  elseif python_imports#is_stdlib_module(l:name)
     let pkg = ''
   else
     " Let's see if we have one tag, or multiple tags (in which case we'll
@@ -177,7 +177,7 @@ function! pythonimports#import_name(name, here, stay)
     elseif len(found) == 1
       " Only one name found, we can skip the selection menu and the
       " whole costly procedure of opening split windows.
-      let pkg = pythonimports#filename2module(found[0].filename)
+      let pkg = python_imports#filename2module(found[0].filename)
     else
       " Try to jump to the tag in a new window
       let v:errmsg = ""
@@ -214,7 +214,7 @@ function! pythonimports#import_name(name, here, stay)
       exec l:oldwinnr "wincmd w"
     endif
     if fnamemodify(pkg, 't') == l:name . ".py"
-      let pkg = pythonimports#package_of(pkg)
+      let pkg = python_imports#package_of(pkg)
     endif
   endif
 
@@ -237,7 +237,7 @@ function! pythonimports#import_name(name, here, stay)
       echomsg l:name . " is already imported"
       return
     endif
-    call pythonimports#find_place_for_import(pkg, l:name)
+    call python_imports#find_place_for_import(pkg, l:name)
   endif
   " Find out the indentation of the current line
   let indent = matchstr(getline("."), "^[ \t]*\\%(>>> \\)\\=")

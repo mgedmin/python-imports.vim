@@ -172,23 +172,23 @@ if has('python3')
 endif
 
 function! IsStdlibModule(name)
-  return pythonimports#is_stdlib_module(name)
+  return python_imports#is_stdlib_module(name)
 endf
 
 function! CurrentPythonModule()
-  return pythonimports#filename2module(expand("%"))
+  return python_imports#filename2module(expand("%"))
 endfunction
 
 function! CurrentPythonPackage()
-  return pythonimports#filename2package(expand("%"))
+  return python_imports#filename2package(expand("%"))
 endfunction
 
 function! FindPlaceForImport(pkg, name)
-  call pythonimports#find_place_for_import(a:pkg, a:name)
+  call python_imports#find_place_for_import(a:pkg, a:name)
 endfunction
 
 function! ImportName(name, here, stay)
-  call pythonimports#import_name(a:name, a:here, a:stay)
+  call python_imports#import_name(a:name, a:here, a:stay)
 endf
 
 command! -nargs=? -bang -complete=tag ImportName	call ImportName(<q-args>, 0, <q-bang> == "!")
