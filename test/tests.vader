@@ -1,4 +1,4 @@
-Before (set up some fake tag locations):
+Execute (set up some fake tag locations):
   let g:pythonImports['a'] = ''   " import a
   let g:pythonImports['b'] = ''   " import b
   let g:pythonImports['d'] = 'c'  " from c import d
@@ -7,7 +7,7 @@ Before (set up some fake tag locations):
 # :ImportName
 #
 
-Given python (the following text in a buffer):
+Given python (some Python code):
   import a
 
   def somefunc():
@@ -17,7 +17,7 @@ Do (position the cursor on 'b' and :ImportName):
   /b\<CR>
   :ImportName\<CR>
 
-Expect python (an import statement to be inserted):
+Expect python (an import statement to be inserted at the top):
   import a
   import b
 
@@ -28,17 +28,17 @@ Expect python (an import statement to be inserted):
 # :ImportNameHere
 #
 
-Given python (the following text in a buffer):
+Given python (the same text in a buffer):
   import a
 
   def somefunc():
       return a.x() + b.y()
 
-Do (position the cursor on 'b' and :ImportName):
+Do (position the cursor on 'b' and :ImportNameHere):
   /b\<CR>
   :ImportNameHere\<CR>
 
-Expect python (an import statement to be inserted):
+Expect python (an import statement to be inserted on the line above):
   import a
 
   def somefunc():
@@ -49,16 +49,16 @@ Expect python (an import statement to be inserted):
 # :ImportName with an argument
 #
 
-Given python (the following text in a buffer):
+Given python (some Python code):
   import a
 
   def somefunc():
       return a.x() + d()
 
-Do (:ImportName d):
-  :ImportName d\<CR>
+Execute (:ImportName d):
+  ImportName d
 
-Expect python (an import statement to be inserted):
+Expect python (a from ... import statement to be inserted at the top):
   import a
   from c import d
 
@@ -69,17 +69,17 @@ Expect python (an import statement to be inserted):
 # :ImportNameHere with an argument
 #
 
-Given python (the following text in a buffer):
+Given python (some Python code):
   import a
 
   def somefunc():
       return a.x() + b.y()
 
-Do (position the cursor on 'b' and :ImportNameHere):
+Do (position the cursor on 'b' and :ImportNameHere d):
   /b\<CR>
   :ImportNameHere d\<CR>
 
-Expect python (an import statement to be inserted):
+Expect python (a from ... import statement to be inserted on the line above):
   import a
 
   def somefunc():
@@ -100,8 +100,8 @@ Given python (a Python script with a docstring):
   def main():
       pass
 
-Do:
-  :ImportName a\<CR>
+Execute (:ImportName):
+  ImportName a
 
 Expect python (an import statement to be inserted after the docstring):
   """
@@ -124,8 +124,8 @@ Given python (a Python script with a comment at the top):
   def main():
       pass
 
-Do:
-  :ImportName a\<CR>
+Execute (:ImportName):
+  ImportName a
 
 Expect python (an import statement to be inserted after the comment):
   #!/usr/bin/env python
@@ -142,11 +142,51 @@ Given python (a Python script with no docstring/comment/other imports):
   def main():
       pass
 
-Do:
-  :ImportName a\<CR>
+Execute (:ImportName):
+  ImportName a
 
 Expect python (an import statement to be inserted at the top):
   import a
   def main():
       pass
 
+#
+# :ImportName with a parenthesized list
+#
+
+Given python (some code that uses a multiline from ... import statement):
+  from c import (
+     a,
+     b,
+  )
+
+Execute (:ImportName):
+  ImportName d
+
+Expect python (a new name to be inserted in the comma-separated multiline list):
+  from c import (
+     d,
+     a,
+     b,
+  )
+
+#
+# :ImportName with a parenthesized list, import already exist
+#
+
+Given python (some code that uses a multiline from ... import statement):
+  from c import (
+     a,
+     b,
+     d,
+  )
+
+Execute (:ImportName):
+  ImportName d
+
+Expect python (the code to remain unchanged):
+  from c import (
+     a,
+     b,
+     d,
+  )
