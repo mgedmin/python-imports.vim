@@ -106,7 +106,9 @@ function! python_imports#find_place_for_import(pkg, name)
   endif
   " Find the first empty line after that.  NOTE: DO NOT put any comments
   " on the line that says `normal`, or you'll get 24 extra spaces here
-  keepjumps normal }
+  if getline(line(".")) =~ 'import\|"""\|^#'
+    keepjumps normal }
+  endif
   " Try to find an existing import from the same module, and move to
   " the last one of these
   let pkg = a:pkg

@@ -1,4 +1,5 @@
 Before (set up some fake tag locations):
+  let g:pythonImports['a'] = ''   " import a
   let g:pythonImports['b'] = ''   " import b
   let g:pythonImports['d'] = 'c'  " from c import d
 
@@ -84,4 +85,68 @@ Expect python (an import statement to be inserted):
   def somefunc():
       from c import d
       return a.x() + b.y()
+
+#
+# :ImportName skips docstring
+#
+
+Given python (a Python script with a docstring):
+  """
+  this is a docstring
+
+  it can have empty lines inside
+  """
+
+  def main():
+      pass
+
+Do:
+  :ImportName a\<CR>
+
+Expect python (an import statement to be inserted after the docstring):
+  """
+  this is a docstring
+
+  it can have empty lines inside
+  """
+  import a
+
+  def main():
+      pass
+
+#
+# :ImportName skips comment
+#
+
+Given python (a Python script with a comment at the top):
+  #!/usr/bin/env python
+
+  def main():
+      pass
+
+Do:
+  :ImportName a\<CR>
+
+Expect python (an import statement to be inserted after the comment):
+  #!/usr/bin/env python
+  import a
+
+  def main():
+      pass
+
+#
+# :ImportName at the very top
+#
+
+Given python (a Python script with no docstring/comment/other imports):
+  def main():
+      pass
+
+Do:
+  :ImportName a\<CR>
+
+Expect python (an import statement to be inserted at the top):
+  import a
+  def main():
+      pass
 
