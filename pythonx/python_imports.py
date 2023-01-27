@@ -22,13 +22,15 @@ FROM_IMPORT_RX = re.compile(
 
 
 class ImportedName(NamedTuple):
-    modname: str
-    name: str
-    alias: str
+    """Information about the canonical location of an import."""
+
+    modname: str    # fully qualified module (or package) name (can be blank)
+    name: str       # name of the importable thing
+    alias: str      # alias to give to the importable thing (often same as `name`)
 
     @property
     def has_alias(self) -> bool:
-        return self.alias and self.alias != self.name
+        return self.alias != self.name
 
     def __str__(self) -> str:
         bits = [self.name]
@@ -40,6 +42,13 @@ class ImportedName(NamedTuple):
 
 
 def parse_names(names: str, modname: str = '') -> Iterable[ImportedName]:
+    """Parse a list of imported names.
+
+    The grammar is::
+
+        names ::= <name> [as <alias>] [, <names>]
+
+    """
     for name in names.split(','):
         bits = name.split()
         # it's either [name] or [name, 'as', alias], and the following works for both
@@ -47,6 +56,14 @@ def parse_names(names: str, modname: str = '') -> Iterable[ImportedName]:
 
 
 def parse_line(line: str) -> Iterable[ImportedName]:
+    """Parse an import configuration line.
+
+    The grammar is::
+
+        line ::= import <names>
+               | from <modname> import <names>
+
+    """
     m = IMPORT_RX.match(line)
     if m:
         return parse_names(m.group(1))
@@ -54,9 +71,16 @@ def parse_line(line: str) -> Iterable[ImportedName]:
     if m:
         modname = m.group(1)
         return parse_names(m.group(2), modname)
+    # XXX: error handling is currently missing, this will return None and cause
+    # a TypeError in the for loop.
 
 
 def parse_python_imports_cfg(filename: str = DEFAULT_CONFIG_FILE, verbose: bool = False) -> None:
+    """Parse python-imports.cfg if it exists.
+
+    Stores the parsed configuration directly in vim's g:pythonImports and g:pythonImportAliases
+    global variables, which must exist and be defined as dictionaries.
+    """
     try:
         with open(filename) as f:
             for line in f:
