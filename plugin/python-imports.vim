@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 2.0
-" Last Modified: 2023-01-04
+" Version: 3.0
+" Last Modified: 2023-01-27
 "
 " Overview
 " --------
@@ -53,142 +53,142 @@
 " Syntax errors in the config file are silently ignored.
 
 if v:version < 700
-    finish
+  finish
 endif
 
 " Hardcoded names and locations
 " g:pythonImports[module] = '' for module imports
 " g:pythonImports[name] = 'module' for other imports
 if !exists("g:pythonImports")
-    let g:pythonImports = {'print': '__future__'}
+  let g:pythonImports = {'print': '__future__'}
 endif
 
 " g:pythonImportAliases[alias] = name for module imports using aliases, e.g.
 " g:pythonImportAliases['sa'] = 'sqlalchemy' means that you want to 'import sqlalchemy as sa'
 if !exists("g:pythonImportAliases")
-    let g:pythonImportAliases = {}
+  let g:pythonImportAliases = {}
 endif
 
 if has("python") || has("python3")
-    let s:python = has("python3") ? "python3" : "python"
-    exec s:python "import sys, vim"
-    if !exists("g:pythonStdlibPath")
-        exec s:python "vim.command(\"let g:pythonStdlibPath = '%s/lib/python%d.%d'\" % (getattr(sys, 'base_prefix', getattr(sys, 'real_prefix', sys.prefix)), sys.version_info[0], sys.version_info[1]))"
-    endif
-    if !exists("g:pythonBuiltinModules")
-        let g:pythonBuiltinModules = {}
-        exec s:python "for m in sys.builtin_module_names: vim.command(\"let g:pythonBuiltinModules['%s'] = ''\" % m)"
-    endif
-    if !exists("g:pythonExtModuleSuffix")
-        exec s:python "import sysconfig"
-        " grr neovim doesn't have pyxeval()
-        let s:expr = "sysconfig.get_config_var('EXT_SUFFIX') or '.so'"
-        let g:pythonExtModuleSuffix = has("python3") ? py3eval(s:expr) : pyeval(s:expr)
-    endif
+  let s:python = has("python3") ? "python3" : "python"
+  exec s:python "import sys, vim"
+  if !exists("g:pythonStdlibPath")
+    exec s:python "vim.command(\"let g:pythonStdlibPath = '%s/lib/python%d.%d'\" % (getattr(sys, 'base_prefix', getattr(sys, 'real_prefix', sys.prefix)), sys.version_info[0], sys.version_info[1]))"
+  endif
+  if !exists("g:pythonBuiltinModules")
+    let g:pythonBuiltinModules = {}
+    exec s:python "for m in sys.builtin_module_names: vim.command(\"let g:pythonBuiltinModules['%s'] = ''\" % m)"
+  endif
+  if !exists("g:pythonExtModuleSuffix")
+    exec s:python "import sysconfig"
+    " grr old neovim doesn't have pyxeval()
+    let s:expr = "sysconfig.get_config_var('EXT_SUFFIX') or '.so'"
+    let g:pythonExtModuleSuffix = has("python3") ? py3eval(s:expr) : pyeval(s:expr)
+  endif
 elseif !exists("g:pythonStdlibPath")
-    let _py_versions = glob('/usr/lib/python?.*', 1, 1)
-    if _py_versions != []
-        " use latest version (assuming glob sorts the list)
-        let g:pythonStdlibPath = _py_versions[-1]
-    else
-        " what, you don't have Python installed on this machine?
-        let g:pythonStdlibPath = ""
-    endif
+  let _py_versions = glob('/usr/lib/python?.*', 1, 1)
+  if _py_versions != []
+    " use latest version (assuming glob sorts the list)
+    let g:pythonStdlibPath = _py_versions[-1]
+  else
+    " what, you don't have Python installed on this machine?
+    let g:pythonStdlibPath = ""
+  endif
 endif
 
 if !exists("g:pythonExtModuleSuffix")
-    let g:pythonExtModuleSuffix = ".so"
+  let g:pythonExtModuleSuffix = ".so"
 endif
 
 if !exists("g:pythonBuiltinModules")
-    " based on python3.6 on linux, with all private ones removed
-    let g:pythonBuiltinModules = {
-          \ 'array': '',
-          \ 'atexit': '',
-          \ 'binascii': '',
-          \ 'builtins': '',
-          \ 'cmath': '',
-          \ 'errno': '',
-          \ 'faulthandler': '',
-          \ 'fcntl': '',
-          \ 'gc': '',
-          \ 'grp': '',
-          \ 'itertools': '',
-          \ 'marshal': '',
-          \ 'math': '',
-          \ 'posix': '',
-          \ 'pwd': '',
-          \ 'pyexpat': '',
-          \ 'select': '',
-          \ 'spwd': '',
-          \ 'sys': '',
-          \ 'syslog': '',
-          \ 'time': '',
-          \ 'unicodedata': '',
-          \ 'xxsubtype': '',
-          \ 'zipimport': '',
-          \ 'zlib': '',
-          \ }
+  " based on python3.6 on linux, with all private ones removed
+  let g:pythonBuiltinModules = {
+        \ 'array': '',
+        \ 'atexit': '',
+        \ 'binascii': '',
+        \ 'builtins': '',
+        \ 'cmath': '',
+        \ 'errno': '',
+        \ 'faulthandler': '',
+        \ 'fcntl': '',
+        \ 'gc': '',
+        \ 'grp': '',
+        \ 'itertools': '',
+        \ 'marshal': '',
+        \ 'math': '',
+        \ 'posix': '',
+        \ 'pwd': '',
+        \ 'pyexpat': '',
+        \ 'select': '',
+        \ 'spwd': '',
+        \ 'sys': '',
+        \ 'syslog': '',
+        \ 'time': '',
+        \ 'unicodedata': '',
+        \ 'xxsubtype': '',
+        \ 'zipimport': '',
+        \ 'zlib': '',
+        \ }
 endif
 
 if !exists("g:pythonPaths")
-    let g:pythonPaths = []
+  let g:pythonPaths = []
 endif
 
 if !exists("g:pythonImportsUseAleFix")
-    let g:pythonImportsUseAleFix = 1
+  let g:pythonImportsUseAleFix = 1
 endif
 
 function! LoadPythonImports(...)
-    if a:0 == 0
-        let filename = expand('~/.vim/python-imports.cfg')
-        if !filereadable(filename)
-            if &verbose > 0
-                echo "skipping" filename "because it does not exist or is not readable"
-            endif
-            return
-        endif
-    elseif a:0 == 1
-        let filename = a:1
-    else
-        echoerr "too many arguments: expected one (filename)"
-        return
+  if a:0 == 0
+    let filename = expand('~/.vim/python-imports.cfg')
+    if !filereadable(filename)
+      if &verbose > 0
+        echo "skipping" filename "because it does not exist or is not readable"
+      endif
+      return
     endif
-    if &verbose > 0
-        echo "python-imports.vim: loading" filename
-    endif
-    if !has('python3')
-        echoer "Need Python 3 support: I'm not implementing a config file parser in vimscript!"
-        return
-    endif
-    exec s:python "<< END"
+  elseif a:0 == 1
+    let filename = a:1
+  else
+    echoerr "too many arguments: expected one (filename)"
+    return
+  endif
+  if &verbose > 0
+    echo "python-imports.vim: loading" filename
+  endif
+  if !has('python3')
+    echoer "Need Python 3 support: I'm not implementing a config file parser in vimscript!"
+    return
+  endif
+  exec s:python "<< END"
 import python_imports
 python_imports.parse_python_imports_cfg(vim.eval('filename'), int(vim.eval('&verbose')))
 END
 endf
 
 if has('python3')
-    call LoadPythonImports()
+  call LoadPythonImports()
 endif
 
 function! IsStdlibModule(name)
-    return pythonimports#is_stdlib_module(name)
+  return pythonimports#is_stdlib_module(name)
 endf
 
 function! CurrentPythonModule()
-    return pythonimports#filename2module(expand("%"))
+  return pythonimports#filename2module(expand("%"))
 endfunction
 
 function! CurrentPythonPackage()
-    return pythonimports#filename2package(expand("%"))
+  return pythonimports#filename2package(expand("%"))
 endfunction
 
 function! FindPlaceForImport(pkg, name)
-    call pythonimports#find_place_for_import(a:pkg, a:name)
+  call pythonimports#find_place_for_import(a:pkg, a:name)
 endfunction
 
 function! ImportName(name, here, stay)
-    call pythonimports#import_name(a:name, a:here, a:stay)
+  call pythonimports#import_name(a:name, a:here, a:stay)
 endf
 
 command! -nargs=? -bang -complete=tag ImportName	call ImportName(<q-args>, 0, <q-bang> == "!")
