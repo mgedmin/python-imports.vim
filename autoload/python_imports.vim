@@ -245,12 +245,14 @@ function! python_imports#import_name(name, here, stay)
   let indent = matchstr(getline("."), "^[ \t]*\\%(>>> \\)\\=")
   " Check if we're using parenthesized imports already
   let prev_line = getline(line(".")-1)
+  let stopline = 0
   if indent != "" && prev_line  == 'from ' . pkg . ' import ('
     if l:alias != l:name
       let line_to_insert = l:name . ' as ' . l:alias . ','
     else
       let line_to_insert = l:name . ','
     endif
+    let stopline = search(")", "nW")
   elseif indent != "" && prev_line =~ '^from .* import ('
     silent! /)/+1
     nohlsearch
@@ -261,7 +263,7 @@ function! python_imports#import_name(name, here, stay)
   endif
   let line_to_insert = indent . line_to_insert
   " Double check with indent / parenthesized form
-  if !a:here && search('^' . line_to_insert . '$', 'cnw')
+  if !a:here && search('^' . line_to_insert . '$', 'cnw', stopline)
     " import already exists
     redraw
     echomsg l:name . " is already imported"

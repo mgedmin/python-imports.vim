@@ -171,7 +171,7 @@ Expect python (a new name to be inserted in the comma-separated multiline list):
   )
 
 #
-# :ImportName with a parenthesized list, import already exist
+# :ImportName with a parenthesized list, import already exists
 #
 
 Given python (some code that uses a multiline from ... import statement):
@@ -190,3 +190,36 @@ Expect python (the code to remain unchanged):
      b,
      d,
   )
+
+#
+# :ImportName with a parenthesized list, similar import already exists
+#
+
+Given python (some code that uses a multiline from ... import statement):
+  from c import (
+     a,
+     b,
+  )
+
+  things = [
+     a,
+     b,
+     d,
+  ]
+
+Do (position the cursor on 'd' and :ImportName):
+  /d\<CR>
+  :ImportName\<CR>
+
+Expect python (a new name to be inserted in the comma-separated multiline list):
+  from c import (
+     d,
+     a,
+     b,
+  )
+
+  things = [
+     a,
+     b,
+     d,
+  ]
