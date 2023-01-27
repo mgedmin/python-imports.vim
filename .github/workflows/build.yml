@@ -1,0 +1,28 @@
+# NB: this name is used in the status badge
+name: build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * 6"  # 5:00 UTC every Saturday
+
+jobs:
+  build:
+    name: Vader
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v3
+
+      - name: Instal Vader
+        run: git clone --depth=1 https://github.com/junegunn/vader.vim.git
+
+      - name: Run tests
+        run: test/run
