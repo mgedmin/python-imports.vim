@@ -63,6 +63,26 @@ function! pythonimports#package_of(module)
   return pkg
 endfunction
 
+function! pythonimports#is_stdlib_module(name)
+  " Does a:name refer to a standard library module?
+
+  if has_key(g:pythonBuiltinModules, a:name)
+    return 1
+  elseif g:pythonStdlibPath == ""
+    return 0
+  elseif filereadable(g:pythonStdlibPath . "/" . a:name . ".py")
+    return 1
+  elseif filereadable(g:pythonStdlibPath . "/" . a:name . "/__init__.py")
+    return 1
+  elseif filereadable(g:pythonStdlibPath . "/lib-dynload/" . a:name . ".so")
+    return 1
+  elseif filereadable(g:pythonStdlibPath . "/lib-dynload/" . a:name . g:pythonExtModuleSuffix)
+    return 1
+  else
+    return 0
+  endif
+endfunction
+
 function! pythonimports#maybe_reload_config()
   if has('python') || has('python3')
     " XXX: wasteful -- I should check if the file's timestamp has changed

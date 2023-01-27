@@ -182,22 +182,7 @@ if has('python3')
 endif
 
 function! IsStdlibModule(name)
-" Does a:name refer to a standard library module?
-    if has_key(g:pythonBuiltinModules, a:name)
-        return 1
-    elseif g:pythonStdlibPath == ""
-        return 0
-    elseif filereadable(g:pythonStdlibPath . "/" . a:name . ".py")
-        return 1
-    elseif filereadable(g:pythonStdlibPath . "/" . a:name . "/__init__.py")
-        return 1
-    elseif filereadable(g:pythonStdlibPath . "/lib-dynload/" . a:name . ".so")
-        return 1
-    elseif filereadable(g:pythonStdlibPath . "/lib-dynload/" . a:name . g:pythonExtModuleSuffix)
-        return 1
-    else
-        return 0
-    endif
+    return pythonimports#is_stdlib_module(name)
 endf
 
 function! CurrentPythonModule()
@@ -268,7 +253,7 @@ function! ImportName(name, here, stay)
     " Look for hardcoded names
     if has_key(g:pythonImports, l:name)
         let pkg = g:pythonImports[l:name]
-    elseif IsStdlibModule(l:name)
+    elseif pythonimports#is_stdlib_module(l:name)
         let pkg = ''
     else
         " Let's see if we have one tag, or multiple tags (in which case we'll
