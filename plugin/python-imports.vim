@@ -194,42 +194,7 @@ function! CurrentPythonPackage()
 endfunction
 
 function! FindPlaceForImport(pkg, name)
-" Find the appropriate place to insert a "from pkg import name" line.
-
-    " Go to the top (use 'normal gg' because I want to set the ' mark)
-    normal gg
-    keepjumps silent! 0/^"""/;/^"""/           " Skip docstring, if it exists
-    keepjumps silent! /^import\|^from.*import/ " Find the first import statement
-    nohlsearch
-    if a:pkg == '__future__'
-        return
-    endif
-    " Find the first empty line after that.  NOTE: DO NOT put any comments
-    " on the line that says `normal`, or you'll get 24 extra spaces here
-    keepjumps normal }
-    " Try to find an existing import from the same module, and move to
-    " the last one of these
-    let pkg = a:pkg
-    while pkg != ""
-        let stmt = "from ".pkg." "      " look for an exact match first
-        if search('^' . stmt, 'cnw')
-            exec "keepjumps silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
-            nohlsearch
-            break
-        endif
-        let stmt = "from ".pkg."."      " try siblings or subpackages
-        if search('^' . stmt, 'cnw')
-            exec "keepjumps silent! /^".stmt."/;/^\\(".stmt."\\)\\@!/"
-            nohlsearch
-            break
-        endif
-        " If not found, look for imports coming from containing packages
-        if pkg =~ '[.]'
-            let pkg = substitute(pkg, '[.][^.]*$', '', '')
-        else
-            break
-        endif
-    endwhile
+    call pythonimports#find_place_for_import(a:pkg, a:name)
 endfunction
 
 function! ImportName(name, here, stay)
