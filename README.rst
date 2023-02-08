@@ -23,6 +23,10 @@ Needs Vim 7.0, preferably built with Python 3 support.  (It will still work
 without Python, but functionality will be degraded, e.g. the configuration file
 will be ignored.)
 
+Integrates with `ALE <https://github.com/dense-analysis/ale>`_ to apply
+``isort`` formatting automatically (this can be turned off by adding
+``:let g:pythonImportsUseAleFix = 0`` to your .vimrc).
+
 Tested on Linux only.
 
 
