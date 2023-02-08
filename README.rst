@@ -13,6 +13,15 @@ Type ``:ImportName [<name>]`` to add an import statement at the top of the file.
 Type ``:ImportNameHere [<name>]`` to add an import statement above the current
 line.
 
+Without an argument, these insert an import statement for the name under the
+cursor.
+
+Since this plugin is not very smart, it leaves the cursor on the newly inserted
+line so you can see what it changed and fix it if the import ended up in the
+wrong place or uses the wrong syntax.  Use ``''`` or `````` to jump back.  If
+you don't like this, you can use ``:ImportName!``/``:ImportNameHere!`` to
+avoid moving the cursor.
+
 I use the following mappings to import the name under cursor with a single
 keystroke::
 
