@@ -98,7 +98,11 @@ function! python_imports#find_place_for_import(pkg, name)
 
   " Go to the top (use 'normal gg' because I want to set the ' mark)
   normal gg
-  keepjumps silent! 0/^"""/;/^"""/           " Skip docstring, if it exists
+  if getline(line(".")) =~ '^"""'
+    keepjumps silent! /^"""/                 " Skip docstring, if it exists
+  else
+    keepjumps silent! /^"""/;/^"""/          " Skip docstring, if it exists
+  endif
   keepjumps silent! /^import\|^from.*import/ " Find the first import statement
   nohlsearch
   if a:pkg == '__future__'
