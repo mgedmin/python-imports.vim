@@ -13,7 +13,7 @@ on:
     - cron: "0 5 * * 6"  # 5:00 UTC every Saturday
 
 jobs:
-  build:
+  vader:
     name: Vader
     runs-on: ubuntu-latest
 
@@ -26,3 +26,70 @@ jobs:
 
       - name: Run tests
         run: test/run
+
+  pytest:
+    name: pytest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.python-version }}"
+
+      - name: Pip cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('tox.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -U setuptools wheel
+          python -m pip install -U tox
+
+      - name: Run tests
+        run: tox -e py
+
+  lint:
+    name: ${{ matrix.toxenv }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        toxenv:
+          - coverage
+
+    steps:
+      - name: Git clone
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ env.default_python || '3.9' }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ env.default_python || '3.9' }}"
+
+      - name: Pip cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.toxenv }}-${{ hashFiles('tox.ini') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.toxenv }}-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install -U setuptools wheel
+          python -m pip install -U tox
+
+      - name: Run ${{ matrix.toxenv }}
+        run: tox -e ${{ matrix.toxenv }}

@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 3.0
-" Last Modified: 2023-01-27
+" Version: 3.1
+" Last Modified: 2023-02-08
 "
 " Overview
 " --------
@@ -33,7 +33,9 @@
 " file should contain Python import statements like
 "    import module1, module2 as alias1, module3
 "    from package.module import name1, name2 as alias2, name3
-" Continuation lines are not supported.
+" Continuation lines are supported if you use parentheses:
+"    from package.module import (name1,
+"       name2 as alias2, name3)
 "
 " Bugs
 " ----
@@ -50,7 +52,6 @@
 "        name2,
 "    )
 " Documentation is scant.
-" Syntax errors in the config file are silently ignored.
 
 if v:version < 700
   finish

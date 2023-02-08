@@ -48,8 +48,9 @@ statements like ::
 
     import module1, module2 as alias, module3
     from package.module import name1, name2 as alias2, name3
-
-Continuation lines are not supported.
+    from package.module import (name1,
+       name2 as alias2, name3,
+    )
 
 This file is ignored if your Vim has no +python3 support.
 
