@@ -184,6 +184,10 @@ function! python_imports#import_name(name, here, stay)
       " Only one name found, we can skip the selection menu and the
       " whole costly procedure of opening split windows.
       let pkg = python_imports#filename2module(found[0].filename)
+      if found[0].kind == 'F'
+        " importing an entire module
+        let pkg = python_imports#package_of(pkg)
+      endif
     else
       " Try to jump to the tag in a new window
       let v:errmsg = ""
@@ -216,14 +220,15 @@ function! python_imports#import_name(name, here, stay)
       " Look at the file name of the module that contains this tag.  Find the
       " nearest parent directory that does not have __init__.py.  Assume it is
       " directly included in PYTHONPATH.
-      let pkg = CurrentPythonModule()
+      let pkg = python_imports#filename2module(expand("%"))
+      let nonfile_tags = found->filter({idx, val -> val.kind != 'F'})
+      if expand("%:t") == l:name . ".py" && nonfile_tags == []
+        let pkg = python_imports#package_of(pkg)
+      endif
       " Close the window containing the tag
       close
       " Return to the right window
       exec l:oldwinnr "wincmd w"
-    endif
-    if fnamemodify(pkg, 't') == l:name . ".py"
-      let pkg = python_imports#package_of(pkg)
     endif
   endif
 
