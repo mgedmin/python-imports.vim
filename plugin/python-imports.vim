@@ -1,7 +1,7 @@
 " File: python-imports.vim
 " Author: Marius Gedminas <marius@gedmin.as>
-" Version: 3.1
-" Last Modified: 2023-02-08
+" Version: 3.2
+" Last Modified: 2023-02-09
 "
 " Overview
 " --------

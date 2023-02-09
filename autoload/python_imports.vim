@@ -187,16 +187,19 @@ function! python_imports#import_name(name, here, stay)
     else
       " Try to jump to the tag in a new window
       let v:errmsg = ""
+      let l:errmsg = ""
       let l:oldfile = expand('%')
       let l:oldswb = &switchbuf
       set switchbuf=split
       let l:oldwinnr = winnr()
       try
-        exec "noautocmd stjump /" . tag_rx
+        exec "stjump /" . tag_rx
+      catch
+        let l:errmsg = v:errmsg
       finally
         let &switchbuf = l:oldswb
       endtry
-      if v:errmsg != ""
+      if l:errmsg != ""
         " Something bad happened (maybe the other file is opened in a
         " different vim instance and there's a swap file)
         if l:oldfile != expand('%')
