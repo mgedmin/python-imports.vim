@@ -176,6 +176,8 @@ function! python_imports#import_name(name, here, stay)
     " let the user decide)
     let tag_rx = "^\\C" . l:name . "\\([.]py\\)\\=$"
     let found = s:taglist(tag_rx, expand("%"))
+    " we never want to import methods!
+    let found = found->filter({idx, val -> val.kind != 'm'})
     if found == []
       " Give up and bail out
       echohl Error | echomsg "Tag not found:" l:name | echohl None
