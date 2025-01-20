@@ -34,7 +34,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
@@ -82,10 +81,10 @@ jobs:
       - name: Git clone
         uses: actions/checkout@v3
 
-      - name: Set up Python ${{ env.default_python || '3.9' }}
+      - name: Set up Python ${{ env.default_python || '3.12' }}
         uses: actions/setup-python@v4
         with:
-          python-version: "${{ env.default_python || '3.9' }}"
+          python-version: "${{ env.default_python || '3.12' }}"
 
       - name: Pip cache
         uses: actions/cache@v3
