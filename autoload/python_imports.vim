@@ -285,9 +285,9 @@ function! python_imports#import_name(name, here, stay)
   endif
   " Add the import statement
   put! =line_to_insert
-  " Adjust import location with isort if possible
+  " Adjust import location with isort/ruff if possible
   if !a:here && g:pythonImportsUseAleFix && exists(":ALEFix") == 2
-    ALEFix isort
+    ALEFix
   endif
   " Jump back if possible
   if a:stay
