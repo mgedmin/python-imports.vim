@@ -180,7 +180,7 @@ function! python_imports#import_name(name, here, stay)
     let found = found->filter({idx, val -> val.kind != 'm'})
     if found == []
       " Give up and bail out
-      echohl Error | echomsg "Tag not found:" l:name | echohl None
+      echohl ErrorMsg | echomsg "Tag not found:" l:name | echohl None
       return
     elseif len(found) == 1
       " Only one name found, we can skip the selection menu and the
